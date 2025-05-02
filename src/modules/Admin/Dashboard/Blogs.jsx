@@ -3,7 +3,7 @@ import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import Quill styles
 import { FaCloudUploadAlt } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const Blogs = () => {

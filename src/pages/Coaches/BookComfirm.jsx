@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 
 const BookingConfirmation = () => {
   const { search } = useLocation();

@@ -9,7 +9,7 @@ import {
   signInStart,
   signInSuccess,
 } from "../../../redux/user/userSlice";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 
 const AdminLogin = () => {

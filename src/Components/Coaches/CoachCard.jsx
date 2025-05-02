@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { FaUser, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa"; // Import icons from react-icons
 
 const Card = ({ cardData }) => {

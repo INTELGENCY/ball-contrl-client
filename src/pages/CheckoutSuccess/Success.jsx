@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { RiCheckboxCircleLine } from "react-icons/ri";
 import { MdOutlineShoppingBag } from "react-icons/md";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
 
 const Success = () => {

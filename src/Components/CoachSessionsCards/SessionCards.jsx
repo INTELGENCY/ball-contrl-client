@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import icons from "../../assets/images/add-session.png";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./SessionStyle.css";

@@ -117,7 +117,7 @@ const PlayerProfile = () => {
         formData.append("imageFile", imageFile);
       }
 
-      const response = await axios.put(
+      const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/player/profile/update/${
           currentUser?._id
         }`,

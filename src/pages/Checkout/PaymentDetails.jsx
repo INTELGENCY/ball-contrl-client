@@ -8,7 +8,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import StripePaymentForm from "./StripePaymentForm";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import axios from "axios";
 import { BaseUrl } from "../../keys";
 

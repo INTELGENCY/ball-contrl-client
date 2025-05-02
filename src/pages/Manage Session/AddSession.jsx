@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiUpload } from "react-icons/fi";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

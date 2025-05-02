@@ -9,7 +9,7 @@ import {
   uploadBytesResumable,
   getStorage,
 } from "firebase/storage";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 
 const EditSession = () => {

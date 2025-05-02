@@ -5,7 +5,7 @@ import { TiArrowSortedDown } from "react-icons/ti";
 import SessionCards from "../../Components/CoachSessionsCards/SessionCards";
 import { useSelector } from "react-redux";
 import FilteredData from "../../Components/CoachSessionsCards/FIlteredData";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const ManageSessions = () => {

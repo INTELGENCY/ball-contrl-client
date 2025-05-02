@@ -5,7 +5,7 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE);
 

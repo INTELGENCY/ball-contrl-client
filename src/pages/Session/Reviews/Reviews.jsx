@@ -3,7 +3,7 @@ import { FaStar, FaTimes } from "react-icons/fa";
 import img from "../../../assets/images/user.jpg";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 
 // Function to calculate the relative time
 const getRelativeTime = (date) => {
