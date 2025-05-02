@@ -1,0 +1,257 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Arial";
+  src: url("../arial-cufonfonts/ARIAL.TTF");
+}
+.cook {
+  font-family: "Arial";
+}
+
+.cookies {
+  font-family: "Arial", "Narrow";
+}
+.input-id {
+  outline: none;
+  border: none;
+}
+.verification-input:focus {
+  background-color: #ffffff;
+  border: 1px solid gray;
+  /* outline: 1px solid red; */
+}
+
+/* html {
+  scroll-behavior: smooth;
+} */
+
+.shadow-custom {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Adjust the values as needed */
+}
+
+input {
+  outline: none;
+}
+.testing {
+  max-width: 2000px;
+  margin: 0 auto;
+}
+
+::-webkit-scrollbar {
+  @apply hidden;
+}
+
+/* Manage sessions */
+.custom-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  /* padding: 10px; */
+  font-size: 16px;
+  /* border: 1px solid #ccc; */
+  /* border-radius: 5px; */
+  /* background: none; */
+  text-align: center;
+  /* Center the text */
+}
+/* add new session image upload */
+.App {
+  border: 2px dashed #8e8e8e;
+  border-radius: 9px;
+  text-align: center;
+  padding: 35px 10px;
+  width: 32%;
+  margin-bottom: 15px;
+}
+
+/* ------ Coach Image add ----------- */
+.App_add {
+  border: 2px dashed #8e8e8e;
+  border-radius: 15px;
+  text-align: center;
+  padding: 40px 20px;
+  width: 35%;
+  margin: 18px auto;
+}
+
+label {
+  cursor: pointer;
+}
+
+label h2 {
+  color: rgb(54, 151, 224);
+}
+
+.upload__icon {
+  font-size: 30px;
+  color: rgb(54, 151, 224);
+}
+
+#fileId {
+  display: none;
+}
+
+.grid-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.grid-item > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-item label {
+  margin-bottom: 0.5rem;
+  /* Adjust spacing between label and input */
+}
+/*  */
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 85vh;
+}
+
+.image-container img {
+  width: 100%;
+  /* height: 100%; */
+  object-fit: cover;
+  /* border-top-left-radius: 1rem; */
+  /* Adjust based on your needs */
+  /* border-bottom-left-radius: 1rem; */
+  /* Adjust based on your needs */
+}
+
+.image-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 90vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.5)
+  );
+  /* border-top-left-radius: 1rem; */
+  /* Adjust based on your needs */
+  /* border-bottom-left-radius: 1rem; */
+  /* Adjust based on your needs */
+  z-index: 1;
+}
+
+.image-container h1 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  color: white;
+  text-align: center;
+  /* font-size: 3.2rem; */
+  /* Adjust based on your needs */
+  font-weight: bold;
+}
+
+.rotate-button {
+  background-color: var(--main-dark);
+  /* Use your custom color variable or replace with a color code */
+  color: white;
+  background-color: #fd86c8;
+  font-size: 1.25rem;
+  /* Equivalent to text-xl in Tailwind */
+  padding: 0.5rem 1.5rem;
+  /* Equivalent to py-2 px-6 in Tailwind */
+  border-radius: 0.5rem;
+  /* Equivalent to rounded-lg in Tailwind */
+  transition: transform 0.5s;
+  /* Smooth transition */
+}
+
+/* .rotate-button:hover {
+  background-color: var(--main-accent);
+  transform: rotateX(360deg);
+} */
+
+/* ---- */
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}
+
+/* Example CSS to ensure correct positioning */
+/* 
+store font */
+
+.lato-font {
+  font-family: "Lato", sans-serif;
+  font-style: normal;
+}
+.grids {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0px 30px;
+  gap: 20px;
+}
+
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"] + label {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  color: #8e8e8e;
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+input[type="date"]:focus + label,
+input[type="date"]:not(:placeholder-shown) + label {
+  top: -20px;
+  left: 10px;
+  font-size: 12px;
+  color: #333;
+}
+
+/* Key frames for Newsletter popup on home page... */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Text selection color changed.. */
+:-moz-selection {
+  color: white;
+  background: #ff8bc9;
+}
+
+::selection {
+  color: white;
+  background: #ff8bc9;
+}

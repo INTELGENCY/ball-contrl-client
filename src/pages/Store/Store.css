@@ -1,0 +1,19 @@
+/* @media (max-width: 800px){
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+}
+
+
+
+@media (min-width: 1024px) and (max-width: 2560px) {
+    
+    .main{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+} */

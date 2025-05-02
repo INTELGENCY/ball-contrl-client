@@ -1,0 +1,67 @@
+/* Small screens */
+@media (max-width: 767px) {
+  .collections {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+/* medium screens */
+@media (min-width: 768px) and (max-width: 992px) {
+  .collections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+}
+
+/* large screen */
+
+@media (min-width: 992px) and (max-width: 1200px) {
+  .collections {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .item {
+    width: 300px;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 2560px) {
+  .collections {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 88%;
+    margin: 0 auto;
+    gap: 15px;
+  }
+
+  .pagination button {
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .pagination button:hover {
+    background-color: #4a4a4a;
+    color: white;
+  }
+
+  .pagination button:disabled {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+  }
+
+  /* ---------------- */
+  .product_data {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+
+  .size {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 100%;
+    gap: 15px;
+  }
+}

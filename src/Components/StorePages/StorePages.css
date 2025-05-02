@@ -1,0 +1,20 @@
+.collections {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr ;
+    width: 85%;
+    margin: 0 auto;
+    gap: 30px;
+}
+.pagination button {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination button:hover {
+    background-color: #4a4a4a;
+    color: white;
+}
+
+.pagination button:disabled {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+}

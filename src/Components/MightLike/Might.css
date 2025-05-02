@@ -1,0 +1,8 @@
+.collections {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    width: 88%;
+    margin: 0 auto;
+    gap: 15px;
+    margin-bottom: 80px;
+}
