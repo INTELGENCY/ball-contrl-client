@@ -343,11 +343,11 @@ const BookingPage = () => {
                 <p>Session</p>
                 <p>1h</p>
               </div>
-              <p>$ {price}</p>
+              <p>£ {price}</p>
             </div>
             <div className="flex py-4 w-full justify-between px-3 font-semibold">
               <p>Total</p>
-              <p>$ {price}</p>
+              <p>£ {price}</p>
             </div>
             <PostalCode setSelectedPostalCode={setSelectedPostalCode} />
 

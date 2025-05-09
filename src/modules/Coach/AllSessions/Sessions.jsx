@@ -1,41 +1,19 @@
 import { Input } from "@material-tailwind/react";
 import React, { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
-import {
-  FaAngleDoubleLeft,
-  FaAngleDoubleRight,
-  FaAngleLeft,
-  FaAngleRight,
-  FaDownload,
-  FaSort,
-  FaSortDown,
-  FaSortUp,
-} from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
-import {
-  useGlobalFilter,
-  usePagination,
-  useSortBy,
-  useTable,
-} from "react-table";
 import { getBookings } from "../../../services/CoachApi";
 import { ClipLoader } from "react-spinners";
-
-const columns = [
-  { Header: "Session Type", accessor: "sessionType" },
-  { Header: "Date", accessor: "sessionDate" },
-  { Header: "Start Time", accessor: "startTime" },
-  { Header: "End Time", accessor: "endTime" },
-  { Header: "Amount", accessor: "sessionAmount" },
-  { Header: "Postal Code", accessor: "postalCode" },
-  { Header: "Player", accessor: "playerId.username" },
-];
+import { DataGrid } from "@mui/x-data-grid";
+import moment from "moment";
 
 export function PastBookings({ user }) {
   const [filterInput, setFilterInput] = useState("");
   const [csvData, setCsvData] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const getSessionDetails = async () => {
@@ -46,7 +24,7 @@ export function PastBookings({ user }) {
           status: "confirmed",
           sessionStatus: "completed",
         };
-        const response = await getBookings(dataToSend); // Assuming this API returns the new data format
+        const response = await getBookings(dataToSend);
         setBookings(response);
         setLoading(false);
       } catch (error) {
@@ -58,183 +36,94 @@ export function PastBookings({ user }) {
   }, [user]);
 
   useEffect(() => {
-    const formattedData = bookings.map((row) => ({
+    const formattedData = bookings?.map((row) => ({
       sessionType: row.sessionType,
-      sessionDate: new Date(row.sessionDate).toLocaleDateString(),
+      sessionDate: moment(row.sessionDate).format("YYYY-MM-DD"),
       startTime: row.startTime,
       endTime: row.endTime,
-      sessionAmount: `$${row.sessionAmount.toFixed(2)}`,
-      postalCode: row.postalCode,
-      playerName: row.playerId ? row.playerId.username : "N/A",
+      sessionAmount: `£${row?.sessionAmount.toFixed(2)}`,
+      postalCode: row?.postalCode,
+      playerName: row.playerId ? row?.playerId?.username : "N/A",
     }));
     setCsvData(formattedData);
   }, [bookings]);
 
-  const tableInstance = useTable(
-    { columns, data: bookings },
-    useGlobalFilter,
-    useSortBy,
-    usePagination
-  );
+  const columns = [
+    { field: "sessionType", headerName: "Session Type", width: 200 },
+    { field: "sessionDate", headerName: "Date", width: 150 },
+    { field: "startTime", headerName: "Start Time", width: 150 },
+    { field: "endTime", headerName: "End Time", width: 150 },
+    { field: "sessionAmount", headerName: "Amount", width: 150 },
+    { field: "postalCode", headerName: "Postal Code", width: 150 },
+    {
+      field: "playerName",
+      headerName: "Player",
+      width: 1,
+      valueGetter: (params) => params?.row?.playerId?.username || "N/A",
+    },
+  ];
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    setGlobalFilter,
-    page,
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
-    state,
-  } = tableInstance;
-
-  const { pageIndex, pageSize } = state;
-
-  const handleFilterChange = (e) => {
-    const value = e.target.value || undefined;
-    setGlobalFilter(value);
-    setFilterInput(value);
-  };
+  const filteredBookings = bookings
+    .filter((row) => {
+      const searchTerm = filterInput.toLowerCase();
+      return (
+        row.sessionType?.toLowerCase().includes(searchTerm) ||
+        row.playerId?.username?.toLowerCase().includes(searchTerm) ||
+        row.postalCode?.toLowerCase().includes(searchTerm)
+      );
+    })
+    .map((row, index) => ({
+      id: index + 1,
+      ...row,
+      sessionDate: moment(row.sessionDate).format("YYYY-MM-DD"),
+      sessionAmount: `$${row.sessionAmount.toFixed(2)}`,
+      playerName: row.playerId?.username || "N/A",
+    }));
 
   if (loading)
     return (
       <div className="w-full h-[600px] flex justify-center items-center">
-        <ClipLoader color="#FEB7DC" size={45} />;
+        <ClipLoader color="#FEB7DC" size={45} />
       </div>
     );
 
   return (
-    <div className="p-4 overflow-x-auto">
-      <p className="text-[25px] font-semibold py-6">Active Bookings</p>
+    <div className="p-4">
+      <p className="text-[25px] font-semibold py-6">Past Bookings</p>
+
       <div className="flex justify-between mb-4">
         <div className="flex items-center rounded-md px-3">
           <Input
             value={filterInput}
-            onChange={handleFilterChange}
+            onChange={(e) => setFilterInput(e.target.value)}
             label="Search"
             icon={<IoIosSearch />}
           />
         </div>
+
         <button className="flex items-center px-4 py-1 bg-main-dark hover:bg-main-accent rounded-md duration-200">
           <FaDownload className="mr-2" />
           <CSVLink
             data={csvData}
-            filename={"bookings.csv"}
+            filename={"past_bookings.csv"}
             className="text-black"
           >
             Download CSV
           </CSVLink>
         </button>
       </div>
-      <table
-        {...getTableProps()}
-        className="min-w-full bg-white border rounded-lg"
-      >
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()} className="border-b">
-              {headerGroup.headers.map((column) => (
-                <th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  className="px-4 py-2 text-left"
-                >
-                  <div className="flex items-center">
-                    {column.render("Header")}
-                    <span className="ml-2">
-                      {column.isSorted ? (
-                        column.isSortedDesc ? (
-                          <FaSortDown />
-                        ) : (
-                          <FaSortUp />
-                        )
-                      ) : (
-                        <FaSort />
-                      )}
-                    </span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {page.length > 0 ? (
-            page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()} className="border-b">
-                  {row.cells.map((cell) => (
-                    <td {...cell.getCellProps()} className="px-4 py-2">
-                      {cell.render("Cell")}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td colSpan={columns.length} className="text-center py-4">
-                No results found 🙁
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-      <div className="pagination mt-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <button
-            onClick={() => gotoPage(0)}
-            disabled={!canPreviousPage}
-            className="p-2 border mr-2 bg-main-accent rounded-full"
-          >
-            <FaAngleDoubleLeft />
-          </button>
-          <button
-            onClick={() => previousPage()}
-            disabled={!canPreviousPage}
-            className="p-1.5 border rounded-full mr-2 bg-main-primary"
-          >
-            <FaAngleLeft />
-          </button>
-          <button
-            onClick={() => nextPage()}
-            disabled={!canNextPage}
-            className="p-1.5 border rounded-full mr-2 bg-main-primary"
-          >
-            <FaAngleRight />
-          </button>
-          <button
-            onClick={() => gotoPage(pageCount - 1)}
-            disabled={!canNextPage}
-            className="p-2 border mr-2 bg-main-accent rounded-full"
-          >
-            <FaAngleDoubleRight />
-          </button>
-        </div>
-        <span className="px-4">
-          Page{" "}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{" "}
-        </span>
-        <select
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
-          className="px-2"
-        >
-          {[10, 20, 30, 50].map((size) => (
-            <option key={size} value={size}>
-              Show {size}
-            </option>
-          ))}
-        </select>
+
+      <div style={{ height: 600, width: "100%" }}>
+        <DataGrid
+          rows={filteredBookings}
+          columns={columns}
+          pageSize={pageSize}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          rowsPerPageOptions={[10, 20, 30, 50]}
+          pagination
+          disableRowSelectionOnClick
+          getRowId={(row) => row._id || row.id}
+        />
       </div>
     </div>
   );
