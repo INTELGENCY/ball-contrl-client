@@ -8,6 +8,7 @@ import {
 } from "../../redux/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { Alert } from "@material-tailwind/react";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -56,6 +57,7 @@ const Signup = () => {
 
       if (data.success === false) {
         dispatch(signInFailure(data.message));
+        toast.error(data.message || "Something went wrong");
         return setErrorMessage(data.message);
       }
 
@@ -70,6 +72,7 @@ const Signup = () => {
     } catch (error) {
       dispatch(signInFailure(error.message));
       setErrorMessage(error.message);
+      toast.error(error.message || "Something went wrong");
     }
   };
 
@@ -166,7 +169,7 @@ const Signup = () => {
           </button>
         </div>
       </form>
-      {errormessage && <Alert className="mt-5">{errormessage}</Alert>}
+      {/* {errormessage && <Alert className="mt-5">{errormessage}</Alert>} */}
     </>
   );
 };

@@ -5,6 +5,7 @@ import { ClipLoader } from "react-spinners";
 import CancellationPolicy from "./Components/CancellationPolicy/CancellationPolicy";
 import { ChatProvider } from "./context/ChatContext";
 import { Toaster } from "react-hot-toast";
+import AdminProtectedRoute from "./Components/Routes/ProtectedRoute/AdminProtectRoute";
 
 // Lazy load layouts
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
@@ -209,7 +210,9 @@ const App = () => {
             </Route>
             {/* <Route element={<ProtectedRoute />}> */}
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route element={<AdminProtectedRoute />}>
+              <Route path="/admin/*" element={<AdminDashboard />} />
+            </Route>
             {/* </Route> */}
           </Routes>
         </ChatProvider>

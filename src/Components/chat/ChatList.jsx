@@ -10,8 +10,6 @@ const ChatList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { currentUser } = useSelector((state) => state.user);
 
-  console.log("the chats are", chats);
-
   // Filter chats based on search query
   const filteredChats = chats.filter((chat) => {
     const isCoach = currentUser?.userType === "Coach";
@@ -52,6 +50,9 @@ const ChatList = () => {
                   const isCoach = currentUser?.userType === "Coach";
                   const chatUser = isCoach ? chat.player : chat.coach;
                   const isSelected = selectedChat?._id === chat._id;
+                  const unreadCount = isCoach
+                    ? chat.unreadCountForCoach
+                    : chat.unreadCountForPlayer;
 
                   return (
                     <div key={chat._id}>
@@ -81,6 +82,17 @@ const ChatList = () => {
                             >
                               {chatUser?.email}
                             </p>
+                            {unreadCount > 0 && (
+                              <span
+                                className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                                  isSelected
+                                    ? "bg-white text-[#bd63b5]"
+                                    : "bg-[#bd63b5] text-white"
+                                }`}
+                              >
+                                {unreadCount}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </li>

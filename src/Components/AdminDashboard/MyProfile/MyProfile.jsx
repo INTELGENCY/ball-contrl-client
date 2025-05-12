@@ -1,17 +1,12 @@
 import { useState, useRef } from "react";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import ProfileDummy from "../../../assets/png/profile_dummy.png";
-import { useSelector } from "react-redux";
-import { ToastContainer, toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 import { FiUpload } from "react-icons/fi";
-import {
-  getDownloadURL,
-  ref,
-  uploadBytesResumable,
-  getStorage,
-} from "firebase/storage";
-import { app } from "../../../firebase";
+import { signInSuccess, signOutSuccess } from "../../../redux/user/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const MyProfile = () => {
   const [formData, setFormData] = useState({
@@ -21,24 +16,21 @@ const MyProfile = () => {
   });
 
   const [profileImage, setProfileImage] = useState(ProfileDummy);
-  const [imageName, setImageName] = useState("");
-  const [imageUploadProgress, setImageUploadProgress] = useState(null);
-  const [imageUploadError, setImageUploadError] = useState(null);
-  const fileInputRef = useRef(null);
+  const [imageFile, setImageFile] = useState(null);
 
-  // State for toggling password visibility
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showReNewPassword, setShowReNewPassword] = useState(false);
-
-  // New states for managing profile image buttons and modal
   const [showProfileButtons, setShowProfileButtons] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleProfileImageClick = () => {
@@ -60,42 +52,11 @@ const MyProfile = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageName(file.name);
-      uploadImageToFirebase(file);
+      setImageFile(file);
       const reader = new FileReader();
-      reader.onload = () => {
-        setProfileImage(reader.result);
-      };
+      reader.onload = () => setProfileImage(reader.result);
       reader.readAsDataURL(file);
     }
-  };
-
-  const uploadImageToFirebase = (file) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + "-" + file.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setImageUploadProgress(progress.toFixed(0));
-      },
-      (error) => {
-        setImageUploadError("Image upload failed");
-        setImageUploadProgress(null);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setProfileImage(downloadURL);
-          setImageUploadProgress(null);
-          setImageUploadError(null);
-          toast.success("Profile picture uploaded successfully!");
-        });
-      }
-    );
   };
 
   const handleChangePassword = async (e) => {
@@ -106,47 +67,50 @@ const MyProfile = () => {
       return;
     }
 
+    const submitData = new FormData();
+    if (imageFile) {
+      submitData.append("imageFile", imageFile);
+    }
+    submitData.append("currentPassword", formData.currentPassword);
+    submitData.append("newPassword", formData.newPassword);
+
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/admin/change-password?id=${
+        `${import.meta.env.VITE_BASE_URL}/admin/update-profile?id=${
           currentUser._id
         }`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            currentPassword: formData.currentPassword,
-            newPassword: formData.newPassword,
-          }),
+          body: submitData,
         }
       );
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Password changed successfully!");
+        toast.success("Profile updated successfully!");
         setFormData({
           currentPassword: "",
           newPassword: "",
           reNewPassword: "",
         });
+        dispatch(signInSuccess(data?.admin));
       } else {
-        toast.error(
-          data.message || "An error occurred while changing the password."
-        );
+        toast.error(data.message || "Failed to update profile.");
       }
-    } catch (err) {
-      toast.error(err.message || "An error occurred.");
+    } catch (error) {
+      toast.error("Something went wrong while updating profile.");
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(signOutSuccess());
+    navigate("/admin-login");
   };
 
   return (
     <div className="flex justify-center mt-1 relative">
-      <ToastContainer />
       <div className="bg-white flex flex-col justify-center items-center w-full md:w-[90%] p-2 rounded-lg">
-        {/* <h2 className="text-2xl font-semibold mb-2">Account Information</h2> */}
         <p className="text-gray-500 mb-6 text-2xl font-semibold">
           Edit your profile
         </p>
@@ -166,14 +130,6 @@ const MyProfile = () => {
             accept="image/*"
             onChange={handleImageChange}
           />
-          {imageName && <p className="text-sm hidden">{imageName}</p>}
-          {imageUploadProgress && (
-            <p>Upload progress: {imageUploadProgress}%</p>
-          )}
-          {imageUploadError && (
-            <p className="text-red-500">{imageUploadError}</p>
-          )}
-
           {showProfileButtons && (
             <div className="flex flex-col md:flex-row gap-2">
               <button
@@ -192,7 +148,7 @@ const MyProfile = () => {
           )}
         </div>
 
-        {/* Modal for Viewing Profile Image */}
+        {/* Modal */}
         {isModalOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 h-screen"
@@ -208,11 +164,11 @@ const MyProfile = () => {
           </div>
         )}
 
-        {/* ------ Form fields ------ */}
-        <form onSubmit={handleChangePassword} className="w-full md:w-[80%]">
-          {/* Password Section */}
+        {/* Form */}
+        <div className="w-full md:w-[80%]">
           <h2 className="text-2xl font-semibold mb-2">Password</h2>
 
+          {/* Current Password */}
           <div className="mb-4 relative">
             <label className="block text-gray-700">Current Password</label>
             <input
@@ -232,6 +188,7 @@ const MyProfile = () => {
             </div>
           </div>
 
+          {/* New Password */}
           <div className="mb-4 relative">
             <label className="block text-gray-700">New Password</label>
             <input
@@ -251,6 +208,7 @@ const MyProfile = () => {
             </div>
           </div>
 
+          {/* Re-type New Password */}
           <div className="mb-4 relative">
             <label className="block text-gray-700">Re-type New Password</label>
             <input
@@ -269,19 +227,21 @@ const MyProfile = () => {
               {showReNewPassword ? <BsEye /> : <BsEyeSlash />}
             </div>
           </div>
+
+          {/* Update + Logout Buttons */}
           <button
-            type="submit"
             className="bg-main-dark text-white mt-2 px-4 py-2 rounded hover:bg-main-darker transition-all duration-200 w-[100%]"
+            onClick={handleChangePassword}
           >
             Update Now
           </button>
           <button
-            type="submit"
+            onClick={handleLogout}
             className="bg-red-400 text-white mt-2 px-4 py-2 rounded hover:bg-red-500 transition-all duration-200 w-[100%]"
           >
             Logout
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

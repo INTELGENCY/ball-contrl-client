@@ -22,9 +22,9 @@ const CoachesPage = () => {
 
   const filteredCoaches = allCoaches.filter(
     (coach) =>
-      coach.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      coach.agegroup.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      coach.address_line_1.toLowerCase().includes(searchTerm.toLowerCase())
+      coach?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coach?.agegroup?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coach?.address_line_1?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Data from backend

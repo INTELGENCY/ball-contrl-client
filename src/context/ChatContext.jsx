@@ -11,6 +11,7 @@ export const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [loading, setLoading] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
+  const [unreadCount, setUnreadCount] = useState(0);
   const userId = currentUser?._id;
   const role = currentUser?.userType?.toLowerCase();
 
@@ -49,6 +50,26 @@ export const ChatProvider = ({ children }) => {
       coachId: selectedChat.coach._id,
     });
 
+    socket.emit("readMessages", {
+      bookingId: selectedChat?.bookingId?._id,
+      userId: selectedChat?.user?._id,
+      userType: role,
+    });
+
+    // Optimistically update the chats list locally
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+        if (chat._id === selectedChat._id) {
+          return {
+            ...chat,
+            unreadCountForPlayer: 0,
+            unreadCountForCoach: 0,
+          };
+        }
+        return chat;
+      })
+    );
+
     // Load messages for the selected chat
     socket.on("loadMessages", (msgs) => {
       setMessages(msgs);
@@ -79,7 +100,18 @@ export const ChatProvider = ({ children }) => {
       console.error("Error fetching chats:", error);
     }
   };
-
+  useEffect(() => {
+    if (chats && chats.length > 0) {
+      const totalUnread = chats.reduce((acc, chat) => {
+        if (role.toLowerCase() === "coach") {
+          return acc + (chat.unreadCountForCoach || 0);
+        } else {
+          return acc + (chat.unreadCountForPlayer || 0);
+        }
+      }, 0);
+      setUnreadCount(totalUnread);
+    }
+  }, [chats, role, selectedChat]);
   // Send a message in the selected chat
   const sendMessage = (text) => {
     if (!selectedChat) return;
@@ -104,6 +136,7 @@ export const ChatProvider = ({ children }) => {
         fetchChats,
         sendMessage,
         loading,
+        unreadCount,
       }}
     >
       {children}
