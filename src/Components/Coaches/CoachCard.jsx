@@ -12,7 +12,7 @@ const Card = ({ cardData }) => {
     if (currentUser) {
       navigate(`/coachProfile/${cardData._id}`, { state: cardData });
     } else {
-      toast("Please log in to view the coach");
+      toast.error("Please log in to view the coach");
     }
   };
 

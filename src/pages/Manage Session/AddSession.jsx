@@ -27,6 +27,59 @@ const AddSession = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imageName, setImageName] = useState("");
 
+  const formFields = [
+    {
+      name: "title",
+      label: "Session Name",
+      type: "text",
+      placeholder: "Enter session name",
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      placeholder: "Enter session description",
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "text",
+      placeholder: "Enter session location",
+    },
+    {
+      name: "price",
+      label: "Price (£)",
+      type: "number",
+      placeholder: "Enter session price",
+      min: "0",
+    },
+  ];
+
+  const selectOptions = {
+    agegroup: [
+      { value: "", label: "Select age group" },
+      { value: "U9-U12", label: "U9-U12" },
+      { value: "U13-U16", label: "U13-U16" },
+      { value: "U16+", label: "U16+" },
+    ],
+    sessionDuration: [
+      { value: "", label: "Select duration" },
+      { value: "45 mins", label: "45 mins" },
+      { value: "60 mins", label: "60 mins" },
+      { value: "90 mins", label: "90 mins" },
+      { value: "120 mins", label: "120 mins" },
+    ],
+    category: [
+      { value: "", label: "Select category" },
+      { value: "1 to 1", label: "1 to 1" },
+      { value: "out field", label: "Out Field" },
+      { value: "football clubs", label: "Football Clubs" },
+      { value: "small group", label: "Small Group" },
+      { value: "full Session", label: "Full Sessions" },
+      { value: "goal keeper", label: "Goal Keeper" },
+    ],
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setSessionData((prev) => ({ ...prev, [name]: value }));
@@ -42,7 +95,6 @@ const AddSession = () => {
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      // 2MB limit
       toast.error("Image size should not exceed 2MB");
       return;
     }
@@ -57,6 +109,7 @@ const AddSession = () => {
       navigate("/coach-dashboard?tab=wallet");
       return;
     }
+
     e.preventDefault();
 
     if (!imageFile) {
@@ -100,7 +153,20 @@ const AddSession = () => {
       );
 
       toast.success("Session created successfully!");
-      resetForm();
+      setSessionData({
+        title: "",
+        description: "",
+        location: "",
+        agegroup: "",
+        category: "",
+        time: "",
+        sessionDuration: "",
+        price: "",
+        coachId: currentUser._id,
+        coachName: currentUser.username,
+      });
+      setImageFile(null);
+      setImageName("");
       navigate("/managesession");
     } catch (error) {
       console.error("Session creation error:", error);
@@ -112,23 +178,6 @@ const AddSession = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setSessionData({
-      title: "",
-      description: "",
-      location: "",
-      agegroup: "",
-      category: "",
-      time: "",
-      sessionDuration: "",
-      price: "",
-      coachId: currentUser._id,
-      coachName: currentUser.username,
-    });
-    setImageFile(null);
-    setImageName("");
   };
 
   return (
@@ -171,124 +220,59 @@ const AddSession = () => {
           )}
         </div>
 
-        {/* Session Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Session Name
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={sessionData.title}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-            placeholder="Enter session name"
-          />
-        </div>
+        {/* Regular Input Fields */}
+        {formFields.map((field) => (
+          <div key={field.name}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+            </label>
+            {field.type === "textarea" ? (
+              <textarea
+                name={field.name}
+                value={sessionData[field.name]}
+                onChange={handleInputChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
+                placeholder={field.placeholder}
+                rows="3"
+              />
+            ) : (
+              <input
+                type={field.type}
+                name={field.name}
+                value={sessionData[field.name]}
+                onChange={handleInputChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
+                placeholder={field.placeholder}
+                min={field.min}
+              />
+            )}
+          </div>
+        ))}
 
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={sessionData.description}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-            placeholder="Enter session description"
-            rows="3"
-          />
-        </div>
-
-        {/* Location */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Location
-          </label>
-          <input
-            type="text"
-            name="location"
-            value={sessionData.location}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-            placeholder="Enter session location"
-          />
-        </div>
-
-        {/* Price */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Price (£)
-          </label>
-          <input
-            type="number"
-            name="price"
-            value={sessionData.price}
-            onChange={handleInputChange}
-            min="0"
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-            placeholder="Enter session price"
-          />
-        </div>
-
-        {/* Age Group */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Age Group
-          </label>
-          <select
-            name="agegroup"
-            value={sessionData.agegroup}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-          >
-            <option value="">Select age group</option>
-            <option value="U9-U12">U9-U12</option>
-            <option value="U13-U16">U13-U16</option>
-            <option value="U16+">U16+</option>
-          </select>
-        </div>
-
-        {/* Session Duration */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Session Duration
-          </label>
-          <select
-            name="sessionDuration"
-            value={sessionData.sessionDuration}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-          >
-            <option value="">Select duration</option>
-            <option value="45 mins">45 mins</option>
-            <option value="60 mins">60 mins</option>
-            <option value="90 mins">90 mins</option>
-            <option value="120 mins">120 mins</option>
-          </select>
-        </div>
-
-        {/* Category */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <select
-            name="category"
-            value={sessionData.category}
-            onChange={handleInputChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
-          >
-            <option value="">Select category</option>
-            <option value="1 to 1">1 to 1</option>
-            <option value="out field">Out Field</option>
-            <option value="football clubs">Football Clubs</option>
-            <option value="small group">Small Group</option>
-            <option value="full Session">Full Sessions</option>
-            <option value="goal keeper">Goal Keeper</option>
-          </select>
-        </div>
+        {/* Select Fields */}
+        {Object.entries(selectOptions).map(([fieldName, options]) => (
+          <div key={fieldName}>
+            <label className="block text-sm font-medium text-gray-700">
+              {fieldName === "agegroup"
+                ? "Age Group"
+                : fieldName === "sessionDuration"
+                ? "Session Duration"
+                : "Category"}
+            </label>
+            <select
+              name={fieldName}
+              value={sessionData[fieldName]}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none"
+            >
+              {options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
 
         {/* Submit Button */}
         <div>

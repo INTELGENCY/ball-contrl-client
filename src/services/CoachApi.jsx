@@ -49,3 +49,39 @@ export const changeSessionStatus = async (bookingId, sessionStatus) => {
     throw error;
   }
 };
+export const fetchStripeBalance = async (formData) => {
+  try {
+    const response = await axios.post(
+      `${BaseUrl}/payments/retrieveTotalBalance`,
+      formData,
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error?.response?.data?.message || "Something went wrong";
+    toast.error("Something went wrong");
+    throw error;
+  }
+};
+export const fetchStripePayouts = async (formData) => {
+  try {
+    const response = await axios.post(
+      `${BaseUrl}/payments/getPayoutList`,
+      formData,
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error?.response?.data?.message || "Something went wrong";
+    toast.error("Something went wrong");
+    throw error;
+  }
+};
