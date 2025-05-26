@@ -51,7 +51,7 @@ const StoreNavbar = () => {
     <>
       <div>
         {/* Navbar for Desktop */}
-        <div className="hidden lg:flex items-center content-center lato-font bg-black justify-around py-[14px]">
+        <div className="hidden lg:flex items-center content-center lato-font bg-black justify-between py-[14p] px-12">
           <div>
             <Link to="/">
               <img
@@ -61,7 +61,7 @@ const StoreNavbar = () => {
               />
             </Link>
           </div>
-          <ul className="flex gap-[50px] justify-center font-medium uppercase items-center">
+          {/* <ul className="flex gap-[50px] justify-center font-medium uppercase items-center">
             {["shirt", "shoes", "pant", "kit", "gloves", "/"].map((item) => (
               <li
                 key={item}
@@ -78,19 +78,19 @@ const StoreNavbar = () => {
                 </Link>
               </li>
             ))}
-          </ul>
+          </ul> */}
           <div>
             <div className="flex gap-[20px] items-center">
-              <Link to="/basket">
+              {/* <Link to="/basket">
                 <img
                   src={cart_icon}
                   className="w-[24px] h-[20px]"
                   alt="Cart Icon"
                 />
-              </Link>
-              <h1 className="mt-[-23px] ml-[-28px] bg-red-700 rounded-[50%] h-[18px] text-[12px] w-[17px] flex justify-center items-center text-white">
+              </Link> */}
+              {/* <h1 className="mt-[-23px] ml-[-28px] bg-red-700 rounded-[50%] h-[18px] text-[12px] w-[17px] flex justify-center items-center text-white">
                 {currentUser ? filteredCartItems.length : 0}
-              </h1>
+              </h1> */}
               <input
                 value={search}
                 onChange={handleInputChange}

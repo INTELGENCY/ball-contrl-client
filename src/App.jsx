@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { ClipLoader } from "react-spinners";
@@ -6,6 +6,7 @@ import CancellationPolicy from "./Components/CancellationPolicy/CancellationPoli
 import { ChatProvider } from "./context/ChatContext";
 import { Toaster } from "react-hot-toast";
 import AdminProtectedRoute from "./Components/Routes/ProtectedRoute/AdminProtectRoute";
+import ScrollToTop from "./Components/ScrollToTop";
 
 // Lazy load layouts
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
@@ -111,6 +112,7 @@ const App = () => {
         }
       >
         <ChatProvider>
+          <ScrollToTop />
           <Routes>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />

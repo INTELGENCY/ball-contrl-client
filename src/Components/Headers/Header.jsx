@@ -67,12 +67,15 @@ const Header = () => {
                 </div>
                 {/* <hr className="bg-white border-[1px] md:hidden border-white w-full " /> */}
                 <div className="hidden md:flex md:justify-start   md:items-center gap-4">
-                  <p className="text-white text-[12px] md:text-[16px]">
+                  <Link
+                    to={"/contact-us"}
+                    className="text-white text-[12px] md:text-[16px]"
+                  >
                     Contact Us
-                  </p>
-                  <p className="text-white text-[12px] md:text-[16px]">
+                  </Link>
+                  {/* <p className="text-white text-[12px] md:text-[16px]">
                     Download App
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="hidden">
