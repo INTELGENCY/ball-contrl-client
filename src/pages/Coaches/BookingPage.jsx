@@ -16,6 +16,9 @@ import PostalCode from "../../Components/PostalCode/PostalCode";
 import { getOneByPlayerAndSessionIds } from "../../services/BookigAPis";
 import moment from "moment";
 import Swal from "sweetalert2";
+import { BaseUrl } from "../../keys";
+import toast from "react-hot-toast";
+import { ClipLoader } from "react-spinners";
 
 const BookingPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -32,11 +35,15 @@ const BookingPage = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [isAlreadyBooked, setIsAlreadyBooked] = useState(false);
   const [isAlreadyBooking, setIsAlreadyBooking] = useState({});
+  const [bookingData, setBookingData] = useState();
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const { coachId } = useParams();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("sessionId");
-  const price = searchParams.get("price");
+  const [price, setPrice] = useState(searchParams.get("price"));
+  const bookingId = searchParams.get("bookingId");
 
   const navigate = useNavigate();
 
@@ -106,6 +113,60 @@ const BookingPage = () => {
     checkIfAlreadyBooked();
   }, [coachId, currentMonth, sessionId]);
 
+  useEffect(() => {
+    const fetchPreviousBooking = async () => {
+      setFetchLoading(true);
+      try {
+        const response = await axios.get(
+          `${BaseUrl}/bookings/getOneBooking/${bookingId}`
+        );
+
+        setBookingData(response?.data?.booking);
+
+        if (bookingId) {
+          setIsEditMode(true);
+
+          const booking = response?.data?.booking;
+
+          if (booking) {
+            setSelectedDate(new Date(booking.sessionDate));
+            setSelectedTime(convertTimeFormat(booking.startTime));
+            setSelectedPostalCode(booking.postalCode);
+            setPrice(booking.sessionAmount);
+          }
+          console.log("the data is", selectedPostalCode, selectedTime, price);
+        }
+
+        setFetchLoading(false);
+      } catch (error) {
+        setFetchLoading(false);
+        console.log("error while fetching data", error);
+      }
+    };
+
+    if (bookingId) {
+      fetchPreviousBooking();
+    }
+  }, [bookingId]);
+
+  const convertTimeFormat = (time) => {
+    if (!time) return null;
+
+    if (time.match(/^\d{1,2}:\d{2}$/)) return time;
+    return moment(time, "h:mm A").format("HH:mm");
+  };
+
+  const isTimeSelected = (slotTime) => {
+    if (!selectedTime) return false;
+
+    // Compare both possible formats
+    return (
+      selectedTime === slotTime ||
+      formatTime(selectedTime) === formatTime(slotTime) ||
+      convertTimeFormat(selectedTime) === slotTime
+    );
+  };
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
     setSelectedTime(null);
@@ -164,87 +225,62 @@ const BookingPage = () => {
 
     try {
       setBookingLoading(true);
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/bookings/generateBooking`,
-        dataToSend,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
+
+      let response;
+      if (isEditMode && bookingId) {
+        response = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/bookings/updateQuote/${bookingId}`,
+          dataToSend,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+      } else {
+        response = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/bookings/generateBooking`,
+          dataToSend,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+      }
+
       setBookingLoading(false);
 
-      Swal.fire({
-        title: "Booking Generated",
-        text: response?.data.message || "Booking generated successfully",
-        icon: "success",
-        confirmButtonText: "Ok",
-      });
+      toast.success(
+        response?.data.message ||
+          (isEditMode
+            ? "Booking updated successfully"
+            : "Booking generated successfully")
+      );
+
       navigate(`/checkout/${response?.data.booking._id}`);
     } catch (error) {
       setBookingLoading(false);
-      console.log("Error generating booking", error);
-      Swal.fire({
-        title: "Error while generating",
-        text:
-          response?.data.message ||
-          "something went wrong while generating booking",
-        icon: "error",
-      });
+      console.error("Error generating booking", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          (isEditMode
+            ? "Something went wrong while updating booking"
+            : "Something went wrong while generating booking")
+      );
     }
   };
-
+  if (fetchLoading)
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <ClipLoader color="#FEB7DC" size={45} />
+      </div>
+    );
   return (
     <SectionWrapper justifyContent="center" alignItems="center" direction="col">
-      {isAlreadyBooked && (
-        <div
-          className={`w-full border ${
-            isAlreadyBooking.status === "confirmed"
-              ? "bg-green-100/50 border-green-300"
-              : "bg-pink-100/50 border-main-dark"
-          } mt-5 p-5 rounded-lg shadow-md flex flex-col items-center justify-center`}
-        >
-          {isAlreadyBooking.status === "confirmed" ? (
-            <div className="flex flex-col items-center text-center">
-              <p className="text-lg font-semibold text-green-700">
-                Session Already Booked
-              </p>
-              <p className="text-sm text-green-600">
-                You have already booked this session on{" "}
-                <span className="font-bold">
-                  {moment(isAlreadyBooking?.selectedDate).format("DD MMM YYYY")}
-                </span>
-                .
-              </p>
-              <button
-                className="mt-4 py-2 px-6 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
-                onClick={() => navigate(`/checkout/${isAlreadyBooking._id}`)}
-              >
-                View Booking Details
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center text-center">
-              <p className="text-lg font-semibold text-gray-800">
-                Booking Already Generated
-              </p>
-              <p className="text-sm text-gray-800">
-                You have already generated the booking for this session. Please
-                click the button below to complete your booking.
-              </p>
-              <button
-                className="mt-4 py-2 px-6 bg-main-dark text-white rounded-md hover:bg-main-darker transition duration-200"
-                onClick={() => navigate(`/checkout/${isAlreadyBooking._id}`)}
-              >
-                Continue Booking
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
       <h2 className="text-2xl font-bold mb-4 text-start w-full my-10">
         Select Date and Time
       </h2>
@@ -303,7 +339,7 @@ const BookingPage = () => {
                     className={`py-6 px-4 rounded-lg border text-start ${
                       isTimeSlotDisabled(slot)
                         ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                        : selectedTime === slot.startTime
+                        : isTimeSelected(slot.startTime) // Use the new comparison
                         ? "bg-main-dark text-white"
                         : "bg-white text-black hover:bg-main-primary"
                     }`}
@@ -349,26 +385,22 @@ const BookingPage = () => {
               <p>Total</p>
               <p>£ {price}</p>
             </div>
-            <PostalCode setSelectedPostalCode={setSelectedPostalCode} />
+            <PostalCode
+              setSelectedPostalCode={setSelectedPostalCode}
+              initialValue={selectedPostalCode}
+            />
 
-            {isAlreadyBooked ? (
-              <button
-                className="mt-4 py-2 px-4 w-full rounded-lg bg-main-darker text-white disabled:bg-gray-300"
-                onClick={() => navigate(`/checkout/${isAlreadyBooking._id}`)}
-              >
-                {isAlreadyBooking.status === "confirmed"
-                  ? "View Details"
-                  : " Continue to Complete"}
-              </button>
-            ) : (
-              <button
-                className="mt-4 py-2 px-4 w-full rounded-lg bg-main-darker text-white disabled:bg-gray-300"
-                disabled={!selectedTime || bookingLoading}
-                onClick={handleGenerateBooking}
-              >
-                {bookingLoading ? "Loading..." : " Continue"}
-              </button>
-            )}
+            <button
+              className="mt-4 py-2 px-4 w-full rounded-lg bg-main-darker text-white disabled:bg-gray-300"
+              disabled={!selectedTime || bookingLoading}
+              onClick={handleGenerateBooking}
+            >
+              {bookingLoading
+                ? "Loading..."
+                : isEditMode
+                ? "Update Booking"
+                : "Continue"}
+            </button>
           </div>
         </div>
       </div>

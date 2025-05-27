@@ -16,7 +16,7 @@ import {
   createPaymentIntent,
   deleteOneBooking,
 } from "../../services/BookigAPis";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export const BookingDetails = ({
   setActiveStep,
@@ -47,11 +47,17 @@ export const BookingDetails = ({
     }
   };
 
+  const handleEdit = async () => {
+    navigate(
+      `/booking/${bookingData.coachId}?sessionId=${bookingData?.sessionId}&bookingId=${bookingData._id}&price=${bookingData?.sessionAmount}`
+    );
+  };
+
   const handleDeleteBooking = async () => {
     try {
       const response = await deleteOneBooking(bookingData._id);
-      navigate("");
-      toast(response?.message || "Booking deletes successfully");
+      navigate(-1);
+      toast.success(response?.message || "Booking deletes successfully");
     } catch (error) {
       console.log("Error while deleting booking");
       toast.error("Error occurred while deleting booking");
@@ -68,7 +74,10 @@ export const BookingDetails = ({
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-gray-900 font-bold text-xl">Your Booking</h2>
-          <button className="flex items-center text-main-darker border border-main-darker px-4 py-1.5 rounded-lg text-sm">
+          <button
+            className="flex items-center text-main-darker border border-main-darker px-4 py-1.5 rounded-lg text-sm"
+            onClick={handleEdit}
+          >
             <FaEdit className="mr-2" /> Edit
           </button>
         </div>

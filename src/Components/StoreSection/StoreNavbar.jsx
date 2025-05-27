@@ -1,148 +1,154 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MdMenuOpen } from "react-icons/md";
 import MobileDrawer from "./MobileDrawer";
 import store_logo from "../../assets/Store/store_logo.svg";
-import cart_icon from "../../assets/Store/cart_image.png";
+import { signOutSuccess } from "../../redux/user/userSlice";
+
+const defaultAvatar =
+  "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
 
 const StoreNavbar = () => {
   const [menu, setMenu] = useState("");
   const [open, setOpen] = useState(false);
-  const cartItems = useSelector((state) => state.basket.cartItems);
-  const currentUser = useSelector((state) => state.user.currentUser);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+  const dropdownRef = useRef(null);
+  const currentUser = useSelector((state) => state.user.currentUser);
 
-  const handleInputChange = (e) => {
-    setSearch(e.target.value);
+  const handleToggleDrawer = () => setOpen(!open);
+  const handleCloseDrawer = () => setOpen(false);
+  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
+
+  const handleLogout = () => {
+    dispatch(signOutSuccess());
+    setDropdownOpen(false);
+    navigate("/");
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleSearchBar();
-    }
-  };
-
-  const handleSearchBar = () => {
-    const searchLower = search.toLowerCase();
-    if (["shoes", "shirt", "kit", "gloves", "pant"].includes(searchLower)) {
-      navigate(`/${searchLower}`);
-    } else {
-      navigate("/pant");
-    }
-  };
-
-  const filteredCartItems = currentUser
-    ? Object.values(cartItems).filter(
-        (item) => item.Customer_id === currentUser._id
-      )
-    : [];
-
-  const handleToggleDrawer = () => {
-    setOpen(!open);
-  };
-
-  const handleCloseDrawer = () => {
-    setOpen(false);
-  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
-      <div>
-        {/* Navbar for Desktop */}
-        <div className="hidden lg:flex items-center content-center lato-font bg-black justify-between py-[14p] px-12">
-          <div>
-            <Link to="/">
-              <img
-                src={store_logo}
-                alt="Store Logo"
-                className="w-[70px] h-[70px]"
-              />
-            </Link>
+      {/* Desktop Navbar */}
+      <div className="hidden lg:flex items-center justify-between bg-black py-4 px-12">
+        <Link to="/store" className="flex items-center gap-4">
+          <img
+            src={store_logo}
+            alt="Store Logo"
+            className="w-[70px] h-[70px]"
+          />
+          <div className="text-white">
+            <h1 className="text-2xl font-bold tracking-wide">
+              Ball Control Store
+            </h1>
+            <p className="text-sm text-gray-300">
+              Empowering Women Through Coaching & Premium Gear
+            </p>
           </div>
-          {/* <ul className="flex gap-[50px] justify-center font-medium uppercase items-center">
-            {["shirt", "shoes", "pant", "kit", "gloves", "/"].map((item) => (
-              <li
-                key={item}
-                className={menu === item ? "text-[#FD86C8]" : "text-white"}
-                onClick={() => setMenu(item)}
-              >
-                <Link to={`/${item === "/" ? "" : item}`}>
-                  {item === "/"
-                    ? "Main Website"
-                    : item.charAt(0).toUpperCase() + item.slice(1)}
-                  {menu === item ? (
-                    <hr className="border-none h-[3px] rounded-[10px] bg-[#020621]" />
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ul> */}
-          <div>
-            <div className="flex gap-[20px] items-center">
-              {/* <Link to="/basket">
-                <img
-                  src={cart_icon}
-                  className="w-[24px] h-[20px]"
-                  alt="Cart Icon"
-                />
-              </Link> */}
-              {/* <h1 className="mt-[-23px] ml-[-28px] bg-red-700 rounded-[50%] h-[18px] text-[12px] w-[17px] flex justify-center items-center text-white">
-                {currentUser ? filteredCartItems.length : 0}
-              </h1> */}
-              <input
-                value={search}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyPress}
-                type="search"
-                placeholder="Search"
-                className="rounded-full bg-transparent border-[1px] text-white border-white p-3 lg:w-[160px] xl:w-[230px] h-[54px]"
-              />
-            </div>
-          </div>
-        </div>
+        </Link>
 
-        {/* Mobile Navbar */}
-        <div className="lg:hidden flex items-center justify-between bg-black p-4">
-          <Link to="/store">
-            <img
-              src={store_logo}
-              alt="Store Logo"
-              className="w-[50px] h-[50px]"
-            />
-          </Link>
-          <div className="flex items-center">
-            <Link to="/basket">
+        {currentUser && (
+          <div ref={dropdownRef} className="relative text-white">
+            <div
+              onClick={toggleDropdown}
+              className="flex items-center gap-3 cursor-pointer"
+            >
               <img
-                src={cart_icon}
-                className="w-[24px] h-[20px]"
-                alt="Cart Icon"
+                src={currentUser.profilePicture || defaultAvatar}
+                alt="User"
+                className="w-10 h-10 rounded-full border"
               />
-            </Link>
-            {currentUser && (
-              <div className="ml-[-10px] bg-red-700 rounded-full h-4 w-4 flex justify-center items-center text-xs text-white">
-                {filteredCartItems.length}
+              <span className="text-sm">{currentUser.username}</span>
+            </div>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-60 bg-white rounded shadow-lg text-black p-4 z-50">
+                <div className="text-sm font-semibold mb-1">
+                  {currentUser.username}
+                </div>
+                <div className="text-xs text-gray-600 mb-3">
+                  {currentUser.email}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full bg-main-dark hover:bg-main-accent text-white text-sm py-1.5 rounded"
+                >
+                  Logout
+                </button>
               </div>
             )}
-            <span onClick={handleToggleDrawer} className="ml-4">
-              <MdMenuOpen size={24} className="text-white cursor-pointer" />
-            </span>
           </div>
-        </div>
-
-        {/* Mobile Drawer for small devices */}
-        <MobileDrawer
-          open={open}
-          handleCloseDrawer={handleCloseDrawer}
-          currentUser={currentUser}
-          menu={menu}
-          setMenu={setMenu}
-          search={search}
-          handleInputChange={handleInputChange}
-          handleKeyPress={handleKeyPress}
-        />
+        )}
       </div>
+
+      {/* Mobile Navbar */}
+      <div className="lg:hidden flex items-center justify-between bg-black p-4">
+        <Link to="/store" className="flex items-center gap-2">
+          <img
+            src={store_logo}
+            alt="Store Logo"
+            className="w-[50px] h-[50px]"
+          />
+          <span className="text-white text-sm font-semibold">Ball Control</span>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          {currentUser && (
+            <div ref={dropdownRef} className="relative">
+              <img
+                onClick={toggleDropdown}
+                src={currentUser.profilePicture || defaultAvatar}
+                alt="User"
+                className="w-8 h-8 rounded-full border cursor-pointer"
+              />
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded shadow-lg text-black p-3 z-50">
+                  <div className="text-sm font-semibold mb-1">
+                    {currentUser.username}
+                  </div>
+                  <div className="text-xs text-gray-600 mb-3">
+                    {currentUser.email}
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white text-sm py-1.5 rounded"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          <MdMenuOpen
+            size={24}
+            className="text-white cursor-pointer"
+            onClick={handleToggleDrawer}
+          />
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      <MobileDrawer
+        open={open}
+        handleCloseDrawer={handleCloseDrawer}
+        currentUser={currentUser}
+        menu={menu}
+        setMenu={setMenu}
+      />
     </>
   );
 };

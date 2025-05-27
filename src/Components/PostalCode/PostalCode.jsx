@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 
-function PostalCode({ setSelectedPostalCode }) {
+function PostalCode({ setSelectedPostalCode, initialValue }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
   const [postalCodes, setPostalCodes] = useState([]);
@@ -52,7 +52,7 @@ function PostalCode({ setSelectedPostalCode }) {
             type="text"
             placeholder="Search postal codes"
             autoComplete="off"
-            value={selectedPostalCode || searchTerm}
+            value={selectedPostalCode || searchTerm || initialValue}
             onChange={(e) => {
               setSelectedPostalCode(""); // Clear selected postal code when typing
               setSearchTerm(e.target.value);
