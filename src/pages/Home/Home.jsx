@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { ClipLoader } from "react-spinners";
+import ChatBotAgent from "./ChatBotAgent";
 
 // Lazy load components
 const Banner = lazy(() => import("../../Components/Banner/Banner"));
@@ -36,6 +37,7 @@ const Home = () => {
         <BecomeCoach />
         <Teacher />
         <EmailPopup />
+        <ChatBotAgent />
       </div>
     </Suspense>
   );

@@ -11,6 +11,7 @@ import MyProfile from "../../Components/AdminDashboard/MyProfile/MyProfile";
 import NewLetterSubscribers from "./Dashboard/NewLetterSubscribers";
 import Blogs from "./Dashboard/Blogs";
 import { ToastContainer } from "react-toastify";
+import ChatbotFaqs from "./Dashboard/ChatbotFaqs";
 const AdminDashboard = () => {
   return (
     <>
@@ -38,6 +39,7 @@ const AdminDashboard = () => {
             element={<NewLetterSubscribers />}
           />
           <Route path="blogs" element={<Blogs />} />
+          <Route path="chatbot-faqs" element={<ChatbotFaqs />} />
           <Route path="admin-profile" element={<MyProfile />} />
         </Route>
       </Routes>

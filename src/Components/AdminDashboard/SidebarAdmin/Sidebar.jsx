@@ -11,6 +11,7 @@ import {
 import { MdMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { SiWebauthn } from "react-icons/si";
+import { ShieldQuestion } from "lucide-react";
 
 const SideBarAdmin = ({ activeTab, setActiveTab }) => {
   // receive props
@@ -35,6 +36,11 @@ const SideBarAdmin = ({ activeTab, setActiveTab }) => {
       tab: "blogs",
       icon: FaEnvelope,
       label: "Blogs",
+    },
+    {
+      tab: "chatbot-faqs",
+      icon: ShieldQuestion,
+      label: "Chatbot Faq",
     },
     { tab: "admin-profile", icon: FaUserCircle, label: "Admin Profile" },
   ];
