@@ -17,6 +17,7 @@ import {
   Divider,
 } from "@mui/material";
 import moment from "moment/moment";
+import { useNavigate } from "react-router-dom";
 
 const AllBookings = ({ user }) => {
   const [filterInput, setFilterInput] = useState("");
@@ -27,23 +28,31 @@ const AllBookings = ({ user }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const navigate = useNavigate();
+
+  const getSessionDetails = async () => {
+    try {
+      setLoading(true);
+      const dataToSend = {
+        coachId: user._id,
+        sessionStatus: ["not started", "ongoing"],
+      };
+      const response = await getBookings(dataToSend);
+      const bookingsWithPlayerName = response.map((booking) => ({
+        ...booking,
+        playerName: booking?.playerId?.username || "N/A",
+      }));
+
+      setBookings(bookingsWithPlayerName);
+
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getSessionDetails = async () => {
-      try {
-        setLoading(true);
-        const dataToSend = {
-          coachId: user._id,
-          status: "confirmed",
-        };
-        const response = await getBookings(dataToSend);
-        setBookings(response);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
-    };
     getSessionDetails();
   }, [user]);
 
@@ -182,31 +191,52 @@ const AllBookings = ({ user }) => {
       width: 120,
     },
     {
-      field: "playerId.username",
+      field: "playerName",
       headerName: "Player",
       width: 150,
-      valueGetter: (params) => params?.row?.playerId?.username || "N/A",
     },
+
     {
       field: "actions",
       headerName: "Actions",
-      width: 180,
+      width: 300,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
         return (
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={(event) => handleStatusMenuClick(event, params.row)}
+          <Box
             sx={{
-              backgroundColor: "#FD86C8",
-              "&:hover": { backgroundColor: "#FF6AB9" },
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 2,
             }}
           >
-            Change Status
-          </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={(event) => handleStatusMenuClick(event, params.row)}
+              sx={{
+                backgroundColor: "#FD86C8",
+                "&:hover": { backgroundColor: "#FF6AB9" },
+              }}
+            >
+              Change Status
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={(event) => navigate("/coach-dashboard?tab=chatbox")}
+              sx={{
+                backgroundColor: "#FD86C8",
+                "&:hover": { backgroundColor: "#FF6AB9" },
+              }}
+            >
+              Message User
+            </Button>
+          </Box>
         );
       },
     },

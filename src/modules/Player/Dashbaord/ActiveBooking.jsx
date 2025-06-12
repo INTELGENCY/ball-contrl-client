@@ -1,46 +1,50 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { TextField, Button, CircularProgress } from "@mui/material";
+import { TextField, Button, CircularProgress, Stack } from "@mui/material";
 import { getBookings } from "../../../services/PlayerApis";
 import { CSVLink } from "react-csv";
 import moment from "moment";
 import { FaDownload } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { releasePayment } from "../../../services/AdminApis";
 
 export function AllBookings({ user }) {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const response = await getBookings({
+        playerId: user._id,
+        status: "confirmed",
+        sessionStatus: ["not started", "ongoing"],
+      });
+      const formatted = response.map((row, index) => ({
+        id: index + 1,
+        sessionType: row.sessionType,
+        sessionDate: moment(row.SessionDate).format("MMM Do YY"),
+        startTime: row.startTime,
+        endTime: row.endTime,
+        sessionAmount: `$${row.sessionAmount?.toFixed(2)}`,
+        postalCode: row.postalCode,
+        sessionStatus: row.sessionStatus,
+        coach: row.coachId?.username || "N/A",
+      }));
+      setBookings(formatted);
+      setFilteredBookings(formatted);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        setLoading(true);
-        const response = await getBookings({
-          playerId: user._id,
-          status: "confirmed",
-          sessionStatus: "not started",
-        });
-        const formatted = response.map((row, index) => ({
-          id: index + 1,
-          sessionType: row.sessionType,
-          sessionDate: moment(row.SessionDate).format("MMM Do YY"),
-          startTime: row.startTime,
-          endTime: row.endTime,
-          sessionAmount: `$${row.sessionAmount?.toFixed(2)}`,
-          postalCode: row.postalCode,
-          sessionStatus: row.sessionStatus,
-          coach: row.coachId?.username || "N/A",
-        }));
-        setBookings(formatted);
-        setFilteredBookings(formatted);
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        setLoading(false);
-      }
-    };
     fetchBookings();
   }, [user]);
 
@@ -55,6 +59,47 @@ export function AllBookings({ user }) {
     setFilteredBookings(filtered);
   };
 
+  const handleReleasePayment = async (id) => {
+    const isConfirmed = await Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to release this payment",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, release it!",
+    });
+
+    if (isConfirmed.isConfirmed) {
+      try {
+        const response = await releasePayment(id);
+        if (response.success) {
+          Swal.fire({
+            title: "Released!",
+            text: "Payment has been released successfully.",
+            icon: "success",
+            confirmButtonColor: "#FF6AB9",
+          });
+          fetchBookings();
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: "Failed to release payment",
+            icon: "error",
+            confirmButtonColor: "red",
+          });
+        }
+      } catch (error) {
+        console.error("Error releasing payment:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to release payment",
+          icon: "error",
+        });
+      }
+    }
+  };
+
   const columns = useMemo(
     () => [
       { field: "sessionType", headerName: "Session Type", width: 150 },
@@ -62,9 +107,89 @@ export function AllBookings({ user }) {
       { field: "startTime", headerName: "Start Time", width: 120 },
       { field: "endTime", headerName: "End Time", width: 150 },
       { field: "sessionAmount", headerName: "Amount", width: 150 },
-      { field: "sessionStatus", headerName: "Session Status", width: 150 },
+      {
+        field: "sessionStatus",
+        headerName: "Session Status",
+        width: 150,
+        renderCell: (params) => {
+          let statusColor;
+          switch (params.value) {
+            case "not started":
+              statusColor = "bg-gray-400";
+              break;
+            case "ongoing":
+              statusColor = "bg-blue-500";
+              break;
+            case "completed":
+              statusColor = "bg-green-500";
+              break;
+            default:
+              statusColor = "bg-gray-400";
+          }
+          return (
+            <span
+              className={`px-2 py-1 rounded-full text-white text-xs ${statusColor}`}
+            >
+              {params.value}
+            </span>
+          );
+        },
+      },
       { field: "postalCode", headerName: "Postal Code", width: 100 },
       { field: "coach", headerName: "Coach", width: 120 },
+      {
+        field: "actions",
+        headerName: "Actions",
+        width: 330,
+        sortable: false,
+        filterable: false,
+        renderCell: (params) => {
+          const isButtonDisabled = !(
+            params.row.sessionStatus === "completed" &&
+            params.row.paymentStatus === "requires capture"
+          );
+          return (
+            <Stack
+              direction={"row"}
+              justifyContent={"center"}
+              alignItems={"center"}
+              gap={2}
+              mt={1}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => navigate("/player-dashboard?tab=chatbox")}
+                sx={{
+                  backgroundColor: "#FD86C8",
+                  "&:hover": { backgroundColor: "#FF6AB9" },
+                }}
+              >
+                Message Coach
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                onClick={() => handleReleasePayment(params.row._id)}
+                disabled={isButtonDisabled}
+                sx={{
+                  backgroundColor: isButtonDisabled ? "#e5e7eb" : "#10b981",
+                  "&:hover": {
+                    backgroundColor: isButtonDisabled ? "#e5e7eb" : "#059669",
+                  },
+                  "&:disabled": {
+                    color: "#9ca3af",
+                  },
+                }}
+              >
+                Release Payment
+              </Button>
+            </Stack>
+          );
+        },
+      },
     ],
     []
   );

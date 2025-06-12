@@ -174,16 +174,16 @@ body {
 
 .chat-body .user-message .text-message {
   color: #fff;
-  background-color: #cf2e2e;
+  background-color: #ff6ab9;
   border-radius: 13px 13px 13px 3px;
 }
 
 .text-message a {
-  color: #ff0055;
+  color: #ff6ab9;
   text-decoration: underline;
 }
 .text-message a:hover {
-  color: #b32400;
+  color: #ff6ab9;
 }
 
 .chat-footer {
@@ -205,7 +205,7 @@ body {
 }
 
 .chat-footer .chat-form:focus-within {
-  outline: 2px solid #cf2e2e;
+  outline: 2px solid #ff6ab9;
 }
 
 .chat-form .message-input {
@@ -223,7 +223,7 @@ body {
   width: 35px;
   border: none;
   outline: none;
-  background: #cf2e2e;
+  background: #ff6ab9;
   color: #fff;
   cursor: pointer;
   font-size: 1.15rem;

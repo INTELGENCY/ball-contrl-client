@@ -122,8 +122,12 @@ const ChatBotAgent = () => {
   }, [chatHistory, showChatbot]);
 
   return (
-    <div className={`container ${showChatbot ? "show-chatbot" : ""} z-[1000]`}>
-      <div onClick={() => setShowChatbot((prev) => !prev)} id="chatbot-toggler">
+    <div className={`container ${showChatbot ? "show-chatbot" : ""}`}>
+      <div
+        onClick={() => setShowChatbot((prev) => !prev)}
+        id="chatbot-toggler"
+        className="z-50"
+      >
         <span className="material-symbols-outlined">
           <MessageCircle size={35} />
         </span>

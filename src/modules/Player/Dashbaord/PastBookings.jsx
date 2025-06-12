@@ -22,7 +22,7 @@ export function PastBookings({ user }) {
     { field: "endTime", headerName: "End Time", width: 150 },
     { field: "sessionAmount", headerName: "Amount", width: 130 },
     { field: "postalCode", headerName: "Postal Code", width: 120 },
-    { field: "playerName", headerName: "Player", width: 120 },
+    { field: "coachName", headerName: "Coach", width: 120 },
   ];
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function PastBookings({ user }) {
         const response = await getBookings({
           playerId: user._id,
           status: "confirmed",
-          sessionStatus: "completed",
+          sessionStatus: ["completed"],
         });
         const formattedData = response.map((row, index) => ({
           id: index + 1,
@@ -42,7 +42,7 @@ export function PastBookings({ user }) {
           endTime: row.endTime,
           sessionAmount: `$${row.sessionAmount.toFixed(2)}`,
           postalCode: row.postalCode,
-          playerName: row.coachId?.username || "N/A",
+          coachName: row.coachId?.username || "N/A",
         }));
         setBookings(formattedData);
         setCsvData(formattedData);

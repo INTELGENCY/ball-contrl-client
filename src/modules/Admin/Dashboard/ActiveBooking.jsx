@@ -16,23 +16,31 @@ const AllBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [releaseLoading, setReleaseLoading] = useState(false);
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const dataToSend = {
+        status: "confirmed",
+      };
+      const response = await getBookings(dataToSend);
+      const bookingsWithPlayerName = response.map((booking) => ({
+        ...booking,
+        playerName: booking?.playerId?.username || "N/A",
+      }));
+
+      setBookings(bookingsWithPlayerName);
+
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getSessionDetails = async () => {
-      try {
-        setLoading(true);
-        const dataToSend = {
-          status: "confirmed",
-        };
-        const response = await getBookings(dataToSend);
-        setBookings(response);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
-      }
-    };
-    getSessionDetails();
+    fetchBookings();
   }, []);
 
   useEffect(() => {
@@ -60,6 +68,7 @@ const AllBookings = () => {
     });
 
     if (isConfirmed.isConfirmed) {
+      setReleaseLoading(true);
       try {
         const response = await releasePayment(id);
         if (response.success) {
@@ -70,14 +79,11 @@ const AllBookings = () => {
             confirmButtonColor: "#FF6AB9",
           });
           // Update local state instead of reloading
-          setBookings(
-            bookings.map((booking) =>
-              booking._id === id
-                ? { ...booking, paymentStatus: "paid" }
-                : booking
-            )
-          );
+          fetchBookings();
+          setReleaseLoading(false);
         } else {
+          setReleaseLoading(false);
+
           Swal.fire({
             title: "Error",
             text: "Failed to release payment",
@@ -141,7 +147,7 @@ const AllBookings = () => {
         let statusColor;
         switch (params.value) {
           case "not started":
-            statusColor = "bg-gray-400";
+            statusColor = "bg-gray-600";
             break;
           case "ongoing":
             statusColor = "bg-blue-500";
@@ -169,7 +175,7 @@ const AllBookings = () => {
         let statusColor;
         switch (params.value) {
           case "requires capture":
-            statusColor = "bg-yellow-500";
+            statusColor = "bg-yellow-800";
             break;
           case "completed":
             statusColor = "bg-green-500";
@@ -192,15 +198,14 @@ const AllBookings = () => {
       width: 120,
     },
     {
-      field: "playerId.username",
+      field: "playerName",
       headerName: "Player",
       width: 150,
-      valueGetter: (params) => params?.row?.playerId?.username || "N/A",
     },
     {
       field: "actions",
       headerName: "Actions",
-      width: 180,
+      width: 200,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
@@ -215,7 +220,7 @@ const AllBookings = () => {
             color="success"
             size="small"
             onClick={() => handleReleasePayment(params.row._id)}
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || releaseLoading}
             sx={{
               backgroundColor: isButtonDisabled ? "#e5e7eb" : "#10b981",
               "&:hover": {

@@ -22,7 +22,7 @@ export function PastBookings({ user }) {
         const dataToSend = {
           coachId: user._id,
           status: "confirmed",
-          sessionStatus: "completed",
+          sessionStatus: ["completed"],
         };
         const response = await getBookings(dataToSend);
         setBookings(response);
@@ -58,7 +58,7 @@ export function PastBookings({ user }) {
     {
       field: "playerName",
       headerName: "Player",
-      width: 1,
+      width: 150,
       valueGetter: (params) => params?.row?.playerId?.username || "N/A",
     },
   ];

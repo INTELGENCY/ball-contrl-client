@@ -36,7 +36,7 @@ const TopBar = () => {
   };
   return (
     <div className="w-full border shadow-xl rounded-lg mb-10 px-3 py-2 md:flex hidden items-center justify-between">
-      <p className="text-lg font-semibold">Dashboard</p>
+      <p className="text-lg font-semibold">Player Dashboard</p>
       <Menu>
         <MenuHandler>
           <Avatar

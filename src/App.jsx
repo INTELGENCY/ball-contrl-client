@@ -103,7 +103,7 @@ const App = () => {
         draggable
         pauseOnHover
       />
-      <Toaster position="top-center" />
+      <Toaster position="bottom-right" />
       <Suspense
         fallback={
           <div className="flex justify-center items-center h-screen">
