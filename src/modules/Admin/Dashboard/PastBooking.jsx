@@ -1,56 +1,43 @@
-import { Input } from "@material-tailwind/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import { Button, CircularProgress, TextField } from "@mui/material";
 import { CSVLink } from "react-csv";
-import {
-  FaAngleDoubleLeft,
-  FaAngleDoubleRight,
-  FaAngleLeft,
-  FaAngleRight,
-  FaDownload,
-  FaSort,
-  FaSortDown,
-  FaSortUp,
-} from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
-import {
-  useGlobalFilter,
-  usePagination,
-  useSortBy,
-  useTable,
-} from "react-table";
-import { getBookings, releasePayment } from "../../../services/AdminApis";
-import { ClipLoader } from "react-spinners";
+import { getBookings } from "../../../services/AdminApis";
 
-const columns = [
-  { Header: "Session Id", accessor: "_id" },
-  { Header: "Session Type", accessor: "sessionType" },
-  { Header: "Date", accessor: "sessionDate" },
-  { Header: "Start Time", accessor: "startTime" },
-  { Header: "End Time", accessor: "endTime" },
-  { Header: "Amount", accessor: "sessionAmount" },
-  { Header: "Session status", accessor: "sessionStatus" },
-  { Header: "Payment status", accessor: "paymentStatus" },
-  { Header: "Postal Code", accessor: "postalCode" },
-  { Header: "Player", accessor: "playerId.username" },
-];
-
-export function PastBookings({}) {
+export function PastBookings() {
   const [filterInput, setFilterInput] = useState("");
   const [csvData, setCsvData] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Fetch bookings
   useEffect(() => {
     const getSessionDetails = async () => {
       try {
         setLoading(true);
         const dataToSend = {
-          status: "confirmed",
-          sessionStatus: "completed",
-          paymentStatus: "completed",
+          sessionStatus: ["completed", "canceled"],
+          status: ["completed", "canceled"],
+          paymentStatus: ["completed", "canceled", "refunded"],
         };
         const response = await getBookings(dataToSend);
-        setBookings(response);
+        setBookings(
+          response.map((row, idx) => ({
+            id: row._id || idx, // DataGrid requires id
+            _id: row._id,
+            sessionType: row.sessionType,
+            sessionDate: new Date(row.sessionDate).toLocaleDateString(),
+            startTime: row.startTime,
+            endTime: row.endTime,
+            sessionAmount: row.sessionAmount,
+            sessionStatus: row.sessionStatus,
+            paymentStatus: row.paymentStatus,
+            postalCode: row.postalCode,
+            playerName: row.playerId ? row.playerId.username : "N/A",
+          }))
+        );
         setLoading(false);
       } catch (error) {
         console.log(error);
@@ -60,187 +47,161 @@ export function PastBookings({}) {
     getSessionDetails();
   }, []);
 
+  // CSV Export Data
   useEffect(() => {
     const formattedData = bookings.map((row) => ({
       sessionType: row.sessionType,
-      sessionDate: new Date(row.sessionDate).toLocaleDateString(),
+      sessionDate: row.sessionDate,
       startTime: row.startTime,
       endTime: row.endTime,
-      sessionAmount: `$${row.sessionAmount.toFixed(2)}`,
+      sessionAmount: `$${Number(row.sessionAmount).toFixed(2)}`,
       postalCode: row.postalCode,
-      playerName: row.playerId ? row.playerId.username : "N/A",
+      playerName: row.playerName,
     }));
     setCsvData(formattedData);
   }, [bookings]);
 
-  const tableInstance = useTable(
-    { columns, data: bookings },
-    useGlobalFilter,
-    useSortBy,
-    usePagination
+  // Columns Definition for DataGrid
+  const columns = useMemo(
+    () => [
+      { field: "_id", headerName: "Session Id", width: 170 },
+      { field: "sessionType", headerName: "Session Type", width: 140 },
+      { field: "sessionDate", headerName: "Date", width: 120 },
+      { field: "startTime", headerName: "Start Time", width: 120 },
+      { field: "endTime", headerName: "End Time", width: 120 },
+      {
+        field: "sessionAmount",
+        headerName: "Amount",
+        width: 110,
+        // valueFormatter: (params) => `$${Number(params.value).toFixed(2)}`,
+      },
+      {
+        field: "sessionStatus",
+        headerName: "Session Status",
+        width: 150,
+        renderCell: (params) => {
+          let statusColor;
+          switch (params.value) {
+            case "not started":
+              statusColor = "bg-gray-400";
+              break;
+            case "ongoing":
+              statusColor = "bg-blue-500";
+              break;
+            case "completed":
+              statusColor = "bg-green-500";
+              break;
+            case "canceled":
+              statusColor = "bg-red-500";
+              break;
+            default:
+              statusColor = "bg-gray-400";
+          }
+          return (
+            <span
+              className={`px-2 py-1 rounded-full text-white text-xs ${statusColor}`}
+            >
+              {params.value}
+            </span>
+          );
+        },
+      },
+      {
+        field: "paymentStatus",
+        headerName: "Payment Status",
+        width: 150,
+        renderCell: (params) => {
+          let statusColor;
+          switch (params.value) {
+            case "requires capture":
+              statusColor = "bg-yellow-800";
+              break;
+            case "completed":
+              statusColor = "bg-green-500";
+              break;
+            case "canceled":
+              statusColor = "bg-red-500";
+              break;
+            default:
+              statusColor = "bg-gray-400";
+          }
+          return (
+            <span
+              className={`px-2 py-1 rounded-full text-white text-xs ${statusColor}`}
+            >
+              {params.value}
+            </span>
+          );
+        },
+      },
+      { field: "postalCode", headerName: "Postal Code", width: 100 },
+      { field: "playerName", headerName: "Player", width: 140 },
+    ],
+    []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    setGlobalFilter,
-    page,
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
-    state,
-  } = tableInstance;
-
-  const { pageIndex, pageSize } = state;
-
-  const handleFilterChange = (e) => {
-    const value = e.target.value || undefined;
-    setGlobalFilter(value);
-    setFilterInput(value);
-  };
-
-  if (loading)
-    return (
-      <div className="w-full h-[600px] flex justify-center items-center">
-        <ClipLoader color="#FEB7DC" size={45} />;
-      </div>
-    );
+  // Filter/Global Search
+  const filteredRows = bookings.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(filterInput.toLowerCase())
+  );
 
   return (
     <div className="p-4">
       <p className="text-[25px] font-semibold py-6">Past Bookings</p>
-      <div className="flex justify-between mb-4">
-        <div className="flex items-center rounded-md px-3">
-          <Input
-            value={filterInput}
-            onChange={handleFilterChange}
-            label="Search"
-            icon={<IoIosSearch />}
-          />
-        </div>
-        <button className="flex items-center px-4 py-1 bg-main-dark hover:bg-main-accent rounded-md duration-200">
-          <FaDownload className="mr-2" />
+      <div className="flex justify-between mb-4 items-center gap-2 flex-wrap">
+        <TextField
+          value={filterInput}
+          onChange={(e) => setFilterInput(e.target.value)}
+          label="Search"
+          variant="outlined"
+          size="small"
+          InputProps={{
+            startAdornment: <IoIosSearch className="mr-2 text-xl" />,
+          }}
+        />
+        <Button
+          variant="contained"
+          startIcon={<FaDownload />}
+          sx={{
+            backgroundColor: "#FD86C8",
+            "&:hover": { backgroundColor: "#FF6AB9" },
+          }}
+        >
           <CSVLink
             data={csvData}
             filename={"bookings.csv"}
-            className="text-black"
+            className="text-white no-underline"
           >
             Download CSV
           </CSVLink>
-        </button>
+        </Button>
       </div>
-      <div className="overflow-x-auto" style={{ maxHeight: "500px" }}>
-        <table
-          {...getTableProps()}
-          className="min-w-full bg-white border rounded-lg"
-        >
-          <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()} className="border-b">
-                {headerGroup.headers.map((column) => (
-                  <th
-                    {...column.getHeaderProps(column.getSortByToggleProps())}
-                    className="px-4 py-2 text-left"
-                  >
-                    <div className="flex items-center">
-                      {column.render("Header")}
-                      <span className="ml-2">
-                        {column.isSorted ? (
-                          column.isSortedDesc ? (
-                            <FaSortDown />
-                          ) : (
-                            <FaSortUp />
-                          )
-                        ) : (
-                          <FaSort />
-                        )}
-                      </span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody {...getTableBodyProps()}>
-            {page.length > 0 ? (
-              page.map((row) => {
-                prepareRow(row);
-                return (
-                  <tr {...row.getRowProps()} className="border-b">
-                    {row.cells.map((cell) => (
-                      <td {...cell.getCellProps()} className="px-4 py-2">
-                        {cell.render("Cell")}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={columns.length} className="text-center py-4">
-                  No results found 🙁
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <div className="pagination mt-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <button
-            onClick={() => gotoPage(0)}
-            disabled={!canPreviousPage}
-            className="p-2 border mr-2 bg-main-accent rounded-full"
-          >
-            <FaAngleDoubleLeft />
-          </button>
-          <button
-            onClick={() => previousPage()}
-            disabled={!canPreviousPage}
-            className="p-1.5 border rounded-full mr-2 bg-main-primary"
-          >
-            <FaAngleLeft />
-          </button>
-          <button
-            onClick={() => nextPage()}
-            disabled={!canNextPage}
-            className="p-1.5 border rounded-full mr-2 bg-main-primary"
-          >
-            <FaAngleRight />
-          </button>
-          <button
-            onClick={() => gotoPage(pageCount - 1)}
-            disabled={!canNextPage}
-            className="p-2 border mr-2 bg-main-accent rounded-full"
-          >
-            <FaAngleDoubleRight />
-          </button>
+      {loading ? (
+        <div className="w-full h-[600px] flex justify-center items-center">
+          <CircularProgress color="secondary" size={45} />
         </div>
-        <span className="px-4">
-          Page{" "}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{" "}
-        </span>
-        <select
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
-          className="px-2"
-        >
-          {[10, 20, 30, 50].map((size) => (
-            <option key={size} value={size}>
-              Show {size}
-            </option>
-          ))}
-        </select>
-      </div>
+      ) : (
+        <div style={{ width: "100%", height: 600 }}>
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10, 20, 30, 50]}
+            disableRowSelectionOnClick
+            disableColumnMenu={false}
+            autoHeight={false}
+            sx={{
+              "& .MuiDataGrid-columnHeaders": { background: "#ffe4fa" },
+            }}
+            localeText={{
+              noRowsLabel: "No results found 🙁",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -20,6 +20,65 @@ export function PastBookings({ user }) {
     { field: "sessionDate", headerName: "Date", width: 150 },
     { field: "startTime", headerName: "Start Time", width: 150 },
     { field: "endTime", headerName: "End Time", width: 150 },
+    {
+      field: "sessionStatus",
+      headerName: "Session Status",
+      width: 150,
+      renderCell: (params) => {
+        let statusColor;
+        switch (params.value) {
+          case "not started":
+            statusColor = "bg-gray-400";
+            break;
+          case "ongoing":
+            statusColor = "bg-blue-500";
+            break;
+          case "completed":
+            statusColor = "bg-green-500";
+            break;
+          case "canceled":
+            statusColor = "bg-red-500";
+            break;
+          default:
+            statusColor = "bg-gray-400";
+        }
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-white text-xs ${statusColor}`}
+          >
+            {params.value}
+          </span>
+        );
+      },
+    },
+    {
+      field: "paymentStatus",
+      headerName: "Payment Status",
+      width: 150,
+      renderCell: (params) => {
+        let statusColor;
+        switch (params.value) {
+          case "requires capture":
+            statusColor = "bg-yellow-800";
+            break;
+          case "completed":
+            statusColor = "bg-green-500";
+            break;
+          case "canceled":
+            statusColor = "bg-red-500";
+            break;
+          default:
+            statusColor = "bg-gray-400";
+        }
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-white text-xs ${statusColor}`}
+          >
+            {params.value}
+          </span>
+        );
+      },
+    },
     { field: "sessionAmount", headerName: "Amount", width: 130 },
     { field: "postalCode", headerName: "Postal Code", width: 120 },
     { field: "coachName", headerName: "Coach", width: 120 },
@@ -31,8 +90,8 @@ export function PastBookings({ user }) {
         setLoading(true);
         const response = await getBookings({
           playerId: user._id,
-          status: "confirmed",
-          sessionStatus: ["completed"],
+          sessionStatus: ["completed", "canceled"],
+          status: ["confirmed", "canceled"],
         });
         const formattedData = response.map((row, index) => ({
           id: index + 1,
@@ -43,6 +102,8 @@ export function PastBookings({ user }) {
           sessionAmount: `$${row.sessionAmount.toFixed(2)}`,
           postalCode: row.postalCode,
           coachName: row.coachId?.username || "N/A",
+          sessionStatus: row.sessionStatus,
+          paymentStatus: row.paymentStatus,
         }));
         setBookings(formattedData);
         setCsvData(formattedData);

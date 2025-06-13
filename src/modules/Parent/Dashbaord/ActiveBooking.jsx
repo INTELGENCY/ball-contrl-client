@@ -1,32 +1,26 @@
-import React, { useEffect, useState } from "react";
 import {
-  useTable,
-  useSortBy,
-  useGlobalFilter,
-  usePagination,
-} from "react-table";
+  Input
+} from "@material-tailwind/react";
+import React, { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import {
-  FaSearch,
   FaAngleDoubleLeft,
+  FaAngleDoubleRight,
   FaAngleLeft,
   FaAngleRight,
-  FaAngleDoubleRight,
   FaDownload,
   FaSort,
-  FaSortUp,
   FaSortDown,
+  FaSortUp
 } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
-import { MdMoreVert } from "react-icons/md";
-import {
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Input,
-} from "@material-tailwind/react";
 import { useSelector } from "react-redux";
+import {
+  useGlobalFilter,
+  usePagination,
+  useSortBy,
+  useTable,
+} from "react-table";
 
 const columns = [
   { Header: "No.", accessor: "no", Cell: ({ row }) => row.index + 1 },

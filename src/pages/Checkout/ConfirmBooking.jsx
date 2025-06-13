@@ -1,5 +1,6 @@
 import moment from "moment";
 import tick_icon from "../../../src/assets/images/tick_icon.png";
+import { Link } from "react-router-dom";
 const ConfirmBooking = ({ bookingData }) => {
   // Dummy JSON data
   const data = {
@@ -60,12 +61,18 @@ const ConfirmBooking = ({ bookingData }) => {
 
         {/* Buttons */}
         <div className="flex items-center space-x-4">
-          <a
-            href="#"
-            className="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800"
+          <Link
+            to={"/"}
+            className="bg-main-dark text-white hover:bg-main-accent rounded-md p-2"
           >
-            {data.buttons.trackOrder}
-          </a>
+            Return to Home
+          </Link>
+          <Link
+            to={"/player-dashboard?tab=newbookings"}
+            className="bg-main-dark text-white hover:bg-main-accent rounded-md p-2"
+          >
+            View Bookings
+          </Link>
         </div>
       </div>
     </section>

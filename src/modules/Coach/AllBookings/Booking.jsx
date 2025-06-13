@@ -35,7 +35,9 @@ const AllBookings = ({ user }) => {
       setLoading(true);
       const dataToSend = {
         coachId: user._id,
-        sessionStatus: ["not started", "ongoing"],
+        sessionStatus: ["not started", "ongoing", "completed"],
+        paymentStatus: ["authorized", "requires capture"],
+        status: "confirmed",
       };
       const response = await getBookings(dataToSend);
       const bookingsWithPlayerName = response.map((booking) => ({
@@ -64,6 +66,7 @@ const AllBookings = ({ user }) => {
       endTime: row.endTime,
       sessionAmount: `$${row.sessionAmount.toFixed(2)}`,
       sessionStatus: row.sessionStatus,
+      paymentStatus: row.paymentStatus,
       postalCode: row.postalCode,
       playerName: row.playerId ? row.playerId.username : "N/A",
     }));
@@ -96,14 +99,7 @@ const AllBookings = ({ user }) => {
           icon: "success",
           confirmButtonColor: "#FF6AB9",
         });
-        // Update local state instead of reloading
-        setBookings(
-          bookings.map((booking) =>
-            booking._id === selectedRow._id
-              ? { ...booking, sessionStatus: selectedStatus }
-              : booking
-          )
-        );
+        getSessionDetails();
       } else {
         Swal.fire({
           title: "Error",
@@ -172,6 +168,34 @@ const AllBookings = ({ user }) => {
             break;
           case "completed":
             statusColor = "bg-green-500";
+            break;
+          default:
+            statusColor = "bg-gray-400";
+        }
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-white text-xs ${statusColor}`}
+          >
+            {params.value}
+          </span>
+        );
+      },
+    },
+    {
+      field: "paymentStatus",
+      headerName: "Payment Status",
+      width: 150,
+      renderCell: (params) => {
+        let statusColor;
+        switch (params.value) {
+          case "requires capture":
+            statusColor = "bg-yellow-800";
+            break;
+          case "completed":
+            statusColor = "bg-green-500";
+            break;
+          case "canceled":
+            statusColor = "bg-red-500";
             break;
           default:
             statusColor = "bg-gray-400";

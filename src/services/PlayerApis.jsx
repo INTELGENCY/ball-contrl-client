@@ -17,7 +17,7 @@ export const getDashBoardStats = async (id) => {
 export const getBookings = async (formData) => {
   try {
     const response = await axios.post(
-      `${BaseUrl}/player/getBookings`,
+      `${BaseUrl}/bookings/getBookings`,
       formData,
       {
         headers: {

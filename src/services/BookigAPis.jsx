@@ -63,3 +63,20 @@ export const getOneByPlayerAndSessionIds = async (playerId, sessionId) => {
     throw error;
   }
 };
+export const cancelBookings = async (formData) => {
+  try {
+    const response = await axios.post(
+      `${BaseUrl}/bookings/cancelBooking`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log("this is error", error);
+    throw error;
+  }
+};

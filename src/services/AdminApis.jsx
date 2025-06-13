@@ -21,7 +21,7 @@ export const getDashUserStats = async (id) => {
 export const getBookings = async (formData) => {
   try {
     const response = await axios.post(
-      `${BaseUrl}/admin/getBookings`,
+      `${BaseUrl}/bookings/getBookings`,
       formData,
       {
         headers: {
