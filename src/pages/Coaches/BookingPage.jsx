@@ -54,7 +54,7 @@ const BookingPage = () => {
 
         const [availabilityResponse, coachResponse, sessionResponse] =
           await Promise.all([
-            axios.post(
+            axios.get(
               `${
                 import.meta.env.VITE_BASE_URL
               }/availability/getAvailabilityDetails/${coachId}`
