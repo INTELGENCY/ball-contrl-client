@@ -57,8 +57,7 @@ const BookingPage = () => {
             axios.post(
               `${
                 import.meta.env.VITE_BASE_URL
-              }/availability/getAvailabilityDetails`,
-              { coachId }
+              }/availability/getAvailabilityDetails/${coachId}`
             ),
             fetch(
               `${import.meta.env.VITE_BASE_URL}/coach/profile/${coachId}`

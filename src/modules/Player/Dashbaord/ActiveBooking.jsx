@@ -32,6 +32,7 @@ export function AllBookings({ user }) {
   const [cancelReason, setCancelReason] = useState("");
   const [reasonError, setReasonError] = useState("");
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [releaseLoading, setReleaseLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -92,6 +93,7 @@ export function AllBookings({ user }) {
 
     if (isConfirmed.isConfirmed) {
       try {
+        setReleaseLoading(true);
         const response = await releasePayment(id);
         if (response.success) {
           Swal.fire({
@@ -101,7 +103,9 @@ export function AllBookings({ user }) {
             confirmButtonColor: "#FF6AB9",
           });
           fetchBookings();
+          setReleaseLoading(false);
         } else {
+          setReleaseLoading(false);
           Swal.fire({
             title: "Error",
             text: "Failed to release payment",
@@ -110,6 +114,7 @@ export function AllBookings({ user }) {
           });
         }
       } catch (error) {
+        setReleaseLoading(false);
         console.error("Error releasing payment:", error);
         Swal.fire({
           title: "Error",
@@ -267,7 +272,7 @@ export function AllBookings({ user }) {
                 color="success"
                 size="small"
                 onClick={() => handleReleasePayment(params.row._id)}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || releaseLoading}
                 sx={{
                   backgroundColor: isButtonDisabled ? "#e5e7eb" : "#10b981",
                   "&:hover": {
@@ -278,7 +283,7 @@ export function AllBookings({ user }) {
                   },
                 }}
               >
-                Release Payment
+                {releaseLoading ? "Loading..." : "Release Payment"}
               </Button>
               {params?.row?.sessionStatus !== "completed" && (
                 <Button
