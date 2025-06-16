@@ -12,6 +12,7 @@ import ChatPage from "./chat";
 import { ToastContainer } from "react-toastify";
 import StripeWallet from "./wallet";
 import AllBookings from "./AllBookings/Booking";
+import AvailabilityManagerPage from "./AddProfile/Availability";
 
 const CoachDashBoard = () => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const CoachDashBoard = () => {
         {tab === "chatbox" && <ChatPage />}
         {tab === "wallet" && <StripeWallet />}
         {tab === "profile" && <Profile />}
+        {tab === "availability" && <AvailabilityManagerPage />}
       </div>
     </div>
   );

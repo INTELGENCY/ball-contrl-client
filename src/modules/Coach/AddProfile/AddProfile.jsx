@@ -482,8 +482,13 @@ const AddProfile = () => {
             </div>
 
             <div className="mt-8 w-1/2 mx-auto">
+              <p className="text-lg font-bold text-red-300 text-center">
+                Please make sure to set your availability to allow players to
+                book a session with you.
+              </p>
+
               <div
-                onClick={() => setShowModal(true)}
+                onClick={() => navigate(`/coach-dashboard?tab=availability`)}
                 className="flex items-center justify-center w-full rounded-md px-4 py-4 border-[1px] outline-none border-[#a0a0a0] cursor-pointer text-gray-900 font-medium gap-2 bg-pink-0"
               >
                 <span className="text-main-dark material-icons">
@@ -492,23 +497,6 @@ const AddProfile = () => {
                 <span>Manage Availability</span>
               </div>
             </div>
-
-            {showModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-md shadow-lg p-6 w-[90%] max-w-6xl">
-                  <div className="flex justify-between items-center border-b pb-2 mb-4">
-                    <h2 className="text-xl font-bold">Manage Availability</h2>
-                    <button
-                      onClick={() => setShowModal(false)}
-                      className="text-gray-600 hover:text-gray-900 text-xl font-bold"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <AvailabilityManager />
-                </div>
-              </div>
-            )}
 
             <div className="py-3 mt-2 w-[40%] mx-auto">
               <button
