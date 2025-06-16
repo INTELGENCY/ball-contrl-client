@@ -2,10 +2,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { socket } from "../utils/socket";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
+  const [searchParams] = useSearchParams();
   const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
@@ -16,6 +18,8 @@ export const ChatProvider = ({ children }) => {
   const role = currentUser?.userType?.toLowerCase();
 
   const baseUrl = import.meta.env.VITE_BASE_URL;
+  const bookingIdFromUrl = searchParams.get("booking");
+  console.log("this is booking", bookingIdFromUrl);
 
   const url =
     role === "player"
@@ -39,6 +43,35 @@ export const ChatProvider = ({ children }) => {
     };
   }, [userId]);
 
+  // Fetch chats and select the appropriate chat based on URL or first chat
+  const fetchChats = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(url);
+      const fetchedChats = response.data.chats;
+      setChats(fetchedChats);
+
+      // Select chat based on bookingId from URL if available
+      if (bookingIdFromUrl && fetchedChats.length > 0) {
+        const chatFromBooking = fetchedChats.find(
+          (chat) => chat.bookingId._id === bookingIdFromUrl
+        );
+        if (chatFromBooking) {
+          setSelectedChat(chatFromBooking);
+        } else {
+          setSelectedChat(fetchedChats[0]);
+        }
+      } else if (fetchedChats.length > 0) {
+        setSelectedChat(fetchedChats[0]);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching chats:", error);
+    }
+  };
+
   // Join room and listen for messages when a chat is selected
   useEffect(() => {
     if (!selectedChat) return;
@@ -50,9 +83,10 @@ export const ChatProvider = ({ children }) => {
       coachId: selectedChat.coach._id,
     });
 
+    // Mark messages as read
     socket.emit("readMessages", {
       bookingId: selectedChat?.bookingId?._id,
-      userId: selectedChat?.user?._id,
+      userId: userId,
       userType: role,
     });
 
@@ -62,8 +96,10 @@ export const ChatProvider = ({ children }) => {
         if (chat._id === selectedChat._id) {
           return {
             ...chat,
-            unreadCountForPlayer: 0,
-            unreadCountForCoach: 0,
+            unreadCountForPlayer:
+              role === "player" ? 0 : chat.unreadCountForPlayer,
+            unreadCountForCoach:
+              role === "coach" ? 0 : chat.unreadCountForCoach,
           };
         }
         return chat;
@@ -85,25 +121,13 @@ export const ChatProvider = ({ children }) => {
       socket.off("loadMessages");
       socket.off("newMessage");
     };
-  }, [selectedChat]);
+  }, [selectedChat, userId, role]);
 
-  // Fetch chats for the current user (player or coach)
-  const fetchChats = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(url);
-      setChats(response.data.chats);
-      setSelectedChat(chats[0]);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.error("Error fetching chats:", error);
-    }
-  };
+  // Calculate unread messages count
   useEffect(() => {
     if (chats && chats.length > 0) {
       const totalUnread = chats.reduce((acc, chat) => {
-        if (role.toLowerCase() === "coach") {
+        if (role === "coach") {
           return acc + (chat.unreadCountForCoach || 0);
         } else {
           return acc + (chat.unreadCountForPlayer || 0);
@@ -112,6 +136,12 @@ export const ChatProvider = ({ children }) => {
       setUnreadCount(totalUnread);
     }
   }, [chats, role, selectedChat]);
+
+  // Initial fetch when component mounts
+  useEffect(() => {
+    fetchChats();
+  }, []);
+
   // Send a message in the selected chat
   const sendMessage = (text) => {
     if (!selectedChat) return;

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { updateUserState } from "../../../../redux/user/userSlice";
+import toast from "react-hot-toast";
 
 const PlayerProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -131,16 +132,11 @@ const PlayerProfile = () => {
 
       dispatch(updateUserState(response?.data?.updatedProfile));
 
-      Swal.fire({
-        title: "Profile updated successfully",
-        icon: "success",
-      });
+      toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
-      Swal.fire({
-        title: "Failed to update profile",
-        icon: "error",
-      });
+
+      toast.error("Failed to update profile");
     } finally {
       setLoading(false);
     }

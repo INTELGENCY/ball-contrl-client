@@ -1,57 +1,97 @@
 import React, { useEffect, useState } from "react";
 import { FiUpload } from "react-icons/fi";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { app } from "../../firebase";
-import {
-  getDownloadURL,
-  ref,
-  uploadBytesResumable,
-  getStorage,
-} from "firebase/storage";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import Swal from "sweetalert2";
+import axios from "axios";
 
 const EditSession = () => {
   const { id } = useParams();
   const { currentUser } = useSelector((state) => state.user);
-  const [imageName, setImageName] = useState("");
-  const [imageUploadProgress, setImageUploadProgress] = useState(null);
-  const [imageUploadError, setImageUploadError] = useState(null);
-  const [loadingImage, setLoadingImage] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imageName, setImageName] = useState("");
   const navigate = useNavigate();
+
   const [sessionData, setSessionData] = useState({
-    image: null,
     title: "",
     description: "",
-    category: "",
     location: "",
-    price: "",
     agegroup: "",
+    category: "",
     sessionDuration: "",
+    price: "",
     coachId: currentUser._id,
+    image: "",
   });
+
+  const formFields = [
+    {
+      name: "title",
+      label: "Session Name",
+      type: "text",
+      placeholder: "Enter session name",
+    },
+    {
+      name: "description",
+      label: "Description",
+      type: "textarea",
+      placeholder: "Enter session description",
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "text",
+      placeholder: "Enter session location",
+    },
+    {
+      name: "price",
+      label: "Price (£)",
+      type: "number",
+      placeholder: "Enter session price",
+      min: "0",
+    },
+  ];
+
+  const selectOptions = {
+    agegroup: [
+      { value: "", label: "Select age group" },
+      { value: "U9-U12", label: "U9-U12" },
+      { value: "U13-U16", label: "U13-U16" },
+      { value: "U16+", label: "U16+" },
+    ],
+    sessionDuration: [
+      { value: "", label: "Select duration" },
+      { value: "45 mins", label: "45 mins" },
+      { value: "60 mins", label: "60 mins" },
+      { value: "90 mins", label: "90 mins" },
+      { value: "120 mins", label: "120 mins" },
+    ],
+    category: [
+      { value: "", label: "Select category" },
+      { value: "1 to 1", label: "1 to 1" },
+      { value: "out field", label: "Out Field" },
+      { value: "football clubs", label: "Football Clubs" },
+      { value: "small group", label: "Small Group" },
+      { value: "full Session", label: "Full Sessions" },
+      { value: "goal keeper", label: "Goal Keeper" },
+    ],
+  };
+
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BASE_URL}/session/${id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/session/${id}`
         );
-        if (response.ok) {
-          const data = await response.json();
-          setSessionData(data);
+        if (response.data) {
+          setSessionData(response.data);
         } else {
           throw new Error("Failed to fetch session data");
         }
       } catch (error) {
         console.error(error);
+        toast.error("Failed to load session data");
       }
     };
 
@@ -66,45 +106,22 @@ const EditSession = () => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setLoadingImage(true);
-      uploadImageToFirebase(file);
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (JPEG, PNG, etc.)");
+      return;
     }
-  };
 
-  const uploadImageToFirebase = (file) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + "-" + file.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size should not exceed 2MB");
+      return;
+    }
 
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setImageUploadProgress(progress.toFixed(0));
-      },
-      (error) => {
-        setImageUploadError("Image upload failed");
-        setImageUploadProgress(null);
-        setLoadingImage(false);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setSessionData((prevState) => ({
-            ...prevState,
-            image: downloadURL,
-          }));
-          setImageName(file.name);
-          setImageUploadProgress(null);
-          setImageUploadError(null);
-          setLoadingImage(false);
-        });
-      }
-    );
+    setImageFile(file);
+    setImageName(file.name);
   };
 
   const handleSubmit = async (e) => {
@@ -112,208 +129,175 @@ const EditSession = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(
+      const formData = new FormData();
+
+      // Only append the image if a new one was selected
+      if (imageFile) {
+        formData.append("imageFile", imageFile);
+      }
+
+      // Append all other session data
+      Object.entries(sessionData).forEach(([key, value]) => {
+        if (key !== "image") {
+          // Don't append the old image URL
+          formData.append(key, value);
+        }
+      });
+
+      const { data } = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/session/${id}`,
+        formData,
         {
-          method: "PUT",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
-          body: JSON.stringify(sessionData),
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            toast.info(`Uploading: ${percentCompleted}% complete`);
+          },
         }
       );
 
-      if (response.ok) {
-        setLoading(false);
-        Swal.fire({
-          title: "Session updated successfully",
-          icon: "success",
-        });
-        setSessionData({
-          image: "",
-          title: "",
-          description: "",
-          category: "",
-          location: "",
-          price: "",
-          agegroup: "",
-          sessionDuration: "",
-        });
-
-        setImageName("");
-        navigate("/managesession");
-      } else {
-        setLoading(false);
-        throw new Error("Failed to update session");
-      }
+      toast.success("Session updated successfully!");
+      navigate("/managesession");
     } catch (error) {
+      console.error("Session update error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update session";
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
-      Swal.fire({
-        title: "Session update failed",
-        icon: "error",
-      });
-      console.error("Error updating session:", error);
     }
   };
 
   return (
-    <div className="w-[90%] mx-auto">
-      <div className="pt-10">
-        <h1 className="text-[44px] text-[#383C3E] font-bold">Edit session</h1>
+    <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+      <div className="flex justify-between items-center mb-4">
+        <Link
+          to={"/managesession"}
+          className="py-2 px-4 rounded-lg bg-main-dark hover:bg-main-accent text-white duration-200"
+        >
+          Back
+        </Link>
       </div>
-      <form method="POST" onSubmit={handleSubmit} encType="multipart/form-data">
-        <div className="flex items-center gap-20">
-          <div className="my-4 App">
-            <div>
-              <label
-                htmlFor="fileId"
-                className="text-[#8E8E8E] flex gap-3 items-center"
-              >
-                <FiUpload className="text-[#8E8E8E]" />
-                Upload session picture
-              </label>
-              {imageName && <p className="mt-2 text-sm">{imageName}</p>}
-              <input
-                type="file"
-                name="image"
-                onChange={handleFileChange}
-                accept="image/*"
-                id="fileId"
-                required={!sessionData.image}
-              />
-              {imageUploadProgress && (
-                <p>Upload progress: {imageUploadProgress}%</p>
-              )}
-              {imageUploadError && (
-                <p className="text-red-500">{imageUploadError}</p>
-              )}
-            </div>
-          </div>
-          <div>
-            {loadingImage ? (
-              <p>Loading image...</p>
-            ) : sessionData.image ? (
-              <img src={sessionData.image} width={200} alt="session_image" />
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-main-darker">Edit Session</h1>
+        <p className="text-gray-600 mt-2">Update your session details</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Session Picture */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Session Picture
+          </label>
+          <div className="mt-1 flex items-center">
+            <button
+              type="button"
+              className="px-4 py-2 bg-main-lighter text-main-darker rounded-md flex items-center hover:bg-main-primary transition"
+              onClick={() => document.getElementById("fileId").click()}
+            >
+              <FiUpload className="mr-2" /> Choose File
+            </button>
+            {imageName ? (
+              <span className="ml-3 text-sm text-gray-600">{imageName}</span>
             ) : (
-              <p>No image uploaded</p>
+              <span className="ml-3 text-sm text-gray-600">
+                {sessionData.image ? "Current image" : "No image selected"}
+              </span>
             )}
           </div>
-        </div>
-        <div>
-          <p className="text-[12px] opacity-70">
-            Attach file. File size of your documents should not exceed 2MB
-          </p>
-        </div>
-        <div
-          className="pt-5 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
           <input
-            type="text"
-            className="w-full"
-            name="title"
-            onChange={handleChange}
-            value={sessionData.title}
-            placeholder="Session Name"
+            type="file"
+            id="fileId"
+            className="hidden"
+            onChange={handleImageChange}
+            accept="image/*"
           />
-        </div>
-        <div
-          className="my-8 py-2 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
-          <input
-            type="text"
-            className="w-full"
-            onChange={handleChange}
-            name="description"
-            value={sessionData.description}
-            placeholder="Description"
-          />
-        </div>
-        <div
-          className="my-8 py-2 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
-          <input
-            type="text"
-            className="w-full"
-            onChange={handleChange}
-            name="location"
-            value={sessionData.location}
-            placeholder="location"
-          />
-        </div>
-        <div
-          className="my-8 py-2 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
-          <input
-            type="text"
-            className="w-full"
-            onChange={handleChange}
-            name="price"
-            value={sessionData.price}
-            placeholder="price"
-          />
-        </div>
-        <div
-          className="my-8 py-2 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
-          <input
-            type="text"
-            className="w-full"
-            onChange={handleChange}
-            name="agegroup"
-            value={sessionData.agegroup}
-            placeholder="agegroup"
-          />
+          <p className="mt-1 text-xs text-gray-500">JPEG, PNG (Max 2MB)</p>
+          {(imageFile || sessionData.image) && (
+            <div className="mt-2">
+              <img
+                src={
+                  imageFile ? URL.createObjectURL(imageFile) : sessionData.image
+                }
+                alt="Session preview"
+                className="w-32 h-32 object-cover rounded"
+              />
+            </div>
+          )}
         </div>
 
-        <div
-          className="my-8 py-2 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
-          <input
-            type="text"
-            className="w-full"
-            onChange={handleChange}
-            name="sessionDuration"
-            value={sessionData.sessionDuration}
-            placeholder="Session duration"
-          />
-        </div>
-        <div
-          className="my-8 py-2 w-[70%]"
-          style={{ borderBottom: "1px solid gray" }}
-        >
-          <select
-            name="category"
-            onChange={handleChange}
-            value={sessionData.category}
-            className="w-[60%] opacity-40"
-            style={{ outline: "none" }}
-          >
-            <option value="category">Select Category</option>
-            <option value="1 to 1">1 to 1</option>
-            <option value="out field">Out Field</option>
-            <option value="football clubs">Football Clubs</option>
-            <option value="small group">Small Group</option>
-          </select>
-        </div>
-        <div className="opacity-70">
-          <p>Need an experienced and skilled hand with custom IT projects?</p>
-          <p>Fill out the form to get a free consultation.</p>
-        </div>
-        <div className="py-3">
+        {/* Regular Input Fields */}
+        {formFields.map((field) => (
+          <div key={field.name}>
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+            </label>
+            {field.type === "textarea" ? (
+              <textarea
+                name={field.name}
+                value={sessionData[field.name]}
+                onChange={handleChange}
+                className="mt-1 block w-full p-2 border border-main-lighter rounded focus:border-main-primary focus:ring-1 focus:ring-main-primary outline-none"
+                placeholder={field.placeholder}
+                rows="3"
+              />
+            ) : (
+              <input
+                type={field.type}
+                name={field.name}
+                value={sessionData[field.name]}
+                onChange={handleChange}
+                className="mt-1 block w-full p-2 border border-main-lighter rounded focus:border-main-primary focus:ring-1 focus:ring-main-primary outline-none"
+                placeholder={field.placeholder}
+                min={field.min}
+              />
+            )}
+          </div>
+        ))}
+
+        {/* Select Fields */}
+        {Object.entries(selectOptions).map(([fieldName, options]) => (
+          <div key={fieldName}>
+            <label className="block text-sm font-medium text-gray-700">
+              {fieldName === "agegroup"
+                ? "Age Group"
+                : fieldName === "sessionDuration"
+                ? "Session Duration"
+                : "Category"}
+            </label>
+            <select
+              name={fieldName}
+              value={sessionData[fieldName]}
+              onChange={handleChange}
+              className="mt-1 block w-full p-2 border border-main-lighter rounded focus:border-main-primary focus:ring-1 focus:ring-main-primary outline-none"
+            >
+              {options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
+
+        {/* Submit Button */}
+        <div>
           <button
             type="submit"
             disabled={loading}
-            className={`bg-[#EC7CD3] text-white w-[40%] rounded-3xl py-3 ${
-              loading ? "disabled:cursor-not-allowed" : ""
-            } `}
+            className={`w-full py-3 rounded-lg transition duration-200 font-semibold ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-main-dark hover:bg-main-darker text-white"
+            }`}
           >
-            {loading ? "Loading..." : "Submit Data"}
+            {loading ? "Processing..." : "UPDATE SESSION"}
           </button>
         </div>
       </form>

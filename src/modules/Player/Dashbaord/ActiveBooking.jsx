@@ -241,7 +241,7 @@ export function AllBookings({ user }) {
           return (
             <Stack
               direction={"row"}
-              justifyContent={"center"}
+              justifyContent={"start"}
               alignItems={"center"}
               gap={2}
               mt={1}
@@ -250,7 +250,11 @@ export function AllBookings({ user }) {
                 variant="contained"
                 color="primary"
                 size="small"
-                onClick={() => navigate("/player-dashboard?tab=chatbox")}
+                onClick={(event) =>
+                  navigate(
+                    `/player-dashboard?tab=chatbox&booking=${params.row._id}`
+                  )
+                }
                 sx={{
                   backgroundColor: "#FD86C8",
                   "&:hover": { backgroundColor: "#FF6AB9" },
@@ -276,19 +280,21 @@ export function AllBookings({ user }) {
               >
                 Release Payment
               </Button>
-              <Button
-                variant="contained"
-                color="error"
-                size="small"
-                onClick={() => openCancelDialog(params.row._id)}
-                sx={{
-                  "&:disabled": {
-                    color: "#9ca3af",
-                  },
-                }}
-              >
-                Cancel Booking
-              </Button>
+              {params?.row?.sessionStatus !== "completed" && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  size="small"
+                  onClick={() => openCancelDialog(params.row._id)}
+                  sx={{
+                    "&:disabled": {
+                      color: "#9ca3af",
+                    },
+                  }}
+                >
+                  Cancel Booking
+                </Button>
+              )}
             </Stack>
           );
         },

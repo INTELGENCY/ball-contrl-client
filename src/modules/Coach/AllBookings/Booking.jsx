@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import moment from "moment/moment";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const AllBookings = ({ user }) => {
   const [filterInput, setFilterInput] = useState("");
@@ -28,6 +29,7 @@ const AllBookings = ({ user }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [statusLoading, setStatusLoading] = useState(false);
   const navigate = useNavigate();
 
   const getSessionDetails = async () => {
@@ -87,34 +89,23 @@ const AllBookings = ({ user }) => {
   const handleStatusChange = async () => {
     if (!selectedRow) return;
 
+    setStatusLoading(true);
+
     try {
       const response = await changeSessionStatus(
         selectedRow._id,
         selectedStatus
       );
       if (response.success) {
-        Swal.fire({
-          title: "Success",
-          text: "Status has been updated successfully",
-          icon: "success",
-          confirmButtonColor: "#FF6AB9",
-        });
+        toast.success("Status has been updated successfully");
         getSessionDetails();
+        setStatusLoading(true);
       } else {
-        Swal.fire({
-          title: "Error",
-          text: "Failed to update status",
-          icon: "error",
-          confirmButtonColor: "red",
-        });
+        toast.success("Failed to update status");
       }
     } catch (error) {
       console.error("Error changing status:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Failed to update status",
-        icon: "error",
-      });
+      toast.success("Failed to update status");
     } finally {
       handleStatusMenuClose();
     }
@@ -231,28 +222,35 @@ const AllBookings = ({ user }) => {
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "start",
               alignItems: "center",
               gap: 2,
             }}
           >
+            {params?.row?.sessionStatus !== "completed" && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={(event) => handleStatusMenuClick(event, params.row)}
+                sx={{
+                  backgroundColor: "#FD86C8",
+                  "&:hover": { backgroundColor: "#FF6AB9" },
+                }}
+              >
+                Change Status
+              </Button>
+            )}
+
             <Button
               variant="contained"
               color="primary"
               size="small"
-              onClick={(event) => handleStatusMenuClick(event, params.row)}
-              sx={{
-                backgroundColor: "#FD86C8",
-                "&:hover": { backgroundColor: "#FF6AB9" },
-              }}
-            >
-              Change Status
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={(event) => navigate("/coach-dashboard?tab=chatbox")}
+              onClick={(event) =>
+                navigate(
+                  `/coach-dashboard?tab=chatbox&booking=${params.row._id}`
+                )
+              }
               sx={{
                 backgroundColor: "#FD86C8",
                 "&:hover": { backgroundColor: "#FF6AB9" },
@@ -388,12 +386,13 @@ const AllBookings = ({ user }) => {
             variant="contained"
             color="primary"
             size="small"
+            disabled={statusLoading}
             sx={{
               backgroundColor: "#FD86C8",
               "&:hover": { backgroundColor: "#FF6AB9" },
             }}
           >
-            Save
+            {statusLoading ? "Loading..." : "Save"}
           </Button>
         </Box>
       </Menu>
