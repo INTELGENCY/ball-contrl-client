@@ -22,6 +22,8 @@ const AllBookings = () => {
     try {
       setLoading(true);
       const dataToSend = {
+        sessionStatus: ["not started", "ongoing", "completed"],
+        paymentStatus: ["authorized", "requires capture"],
         status: "confirmed",
       };
       const response = await getBookings(dataToSend);

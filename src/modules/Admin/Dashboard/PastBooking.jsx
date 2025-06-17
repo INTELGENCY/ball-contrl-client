@@ -19,7 +19,7 @@ export function PastBookings() {
         setLoading(true);
         const dataToSend = {
           sessionStatus: ["completed", "canceled"],
-          status: ["completed", "canceled"],
+          // status: ["completed", "canceled"],
           paymentStatus: ["completed", "canceled", "refunded"],
         };
         const response = await getBookings(dataToSend);
