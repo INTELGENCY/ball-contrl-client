@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import newLetterImg from "../../assets/NewLetter/my-profit-tutor.jpg";
-import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
-import "react-toastify/dist/ReactToastify.css"; // Import react-toastify CSS
+
 import { useSelector } from "react-redux"; // Import useSelector to access Redux state
+import toast from "react-hot-toast";
 
 const EmailPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Access the currentUser state from the Redux store
   const { currentUser } = useSelector((state) => state.user);
@@ -28,10 +29,10 @@ const EmailPopup = () => {
     e.preventDefault();
 
     // Check if the user is logged in
-    if (!currentUser) {
-      toast.error("Please login first.");
-      return;
-    }
+    // if (!currentUser) {
+    //   toast.error("Please login first.");
+    //   return;
+    // }
 
     // Validate email length
     if (email.length > 150) {
@@ -51,6 +52,7 @@ const EmailPopup = () => {
     }
 
     try {
+      setLoading(true);
       const response = await fetch(
         `${import.meta.env.VITE_BASE_URL}/newsletter/addEmail`,
         {
@@ -70,18 +72,15 @@ const EmailPopup = () => {
         toast.error(data.message || "Error submitting email");
       }
       setIsOpen(false);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Error:", error);
     }
   };
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={true}
-      />
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div
@@ -108,11 +107,11 @@ const EmailPopup = () => {
                 <FaTimes size={24} />
               </button>
               <h2 className="text-3xl font-bold mb-4 text-gray-800">
-                Join Ballcontrl!
+                Join Ball Contrl!
               </h2>
               <p className="mb-6 text-gray-700">
                 Hear about women's football, workshops, events & more exciting
-                offers from our Ballcontrl store.
+                offers from our Ball contrl store.
               </p>
               <form onSubmit={handleSubmit}>
                 <input
@@ -133,9 +132,10 @@ const EmailPopup = () => {
                 />
                 <button
                   type="submit"
+                  disabled={loading}
                   className="w-full bg-main-dark text-white py-2 hover:bg-main-darker transition duration-200"
                 >
-                  Subscribe
+                  {loading ? "Loading" : "Subscribe"}
                 </button>
               </form>
               <p className="text-xs text-gray-600 mt-4">

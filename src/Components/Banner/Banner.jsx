@@ -83,7 +83,7 @@ const Banner = () => {
             </h1>
             <p className="text-white text-[14px] text-center lg:text-[20px] text-wrap">
               Find a coach, club, a game of football or find out more about
-              Women's and Girls football.
+              women's and girls' football.
             </p>
 
             <form
@@ -98,10 +98,10 @@ const Banner = () => {
                 onChange={handleChange}
               >
                 <option value="">Select Category</option>
-                <option value="1 to 1">1 to 1</option>
+                <option value="1 to 1">1 to 1 Coaching</option>
                 <option value="out field">Out Field</option>
                 <option value="football clubs">Football Clubs</option>
-                <option value="small group">Small Group</option>
+                <option value="small group">Small Group Coaching</option>
               </select>
 
               {/* <input
@@ -119,7 +119,7 @@ const Banner = () => {
                 value={searchParams.agegroup}
                 onChange={handleChange}
               >
-                <option value="">Select Age group</option>
+                <option value="">Select Age Group</option>
                 <option value="U9-U12">U9-U12</option>
                 <option value="U13-U16">U13-U16</option>
                 <option value="U16+">U16+</option>

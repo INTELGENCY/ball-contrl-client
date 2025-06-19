@@ -55,47 +55,8 @@ const Header = () => {
 
   return (
     <>
-      <div className="h-[104px] bg-white z-50 shadow-lg">
-        <div className="w-full flex justify-center items-center flex-col fixed z-40 bg-white md:shadow-lg">
-          <div className="flex justify-center items-center w-full bg-gray-900">
-            <div className="md:w-[90%] h-15 w-[100%]">
-              <div className="flex flex-col justify-center md:items-center md:flex-row h-full md:py-1  md:gap-4 md:justify-between ">
-                <div>
-                  <h1 className="text-white text-[12px] md:text-[16px] text-center">
-                    Join Our Community And Lets Get Playing Football{" "}
-                  </h1>
-                </div>
-                {/* <hr className="bg-white border-[1px] md:hidden border-white w-full " /> */}
-                <div className="hidden md:flex md:justify-start   md:items-center gap-4">
-                  <Link
-                    to={"/contact-us"}
-                    className="text-white text-[12px] md:text-[16px]"
-                  >
-                    Contact Us
-                  </Link>
-                  {/* <p className="text-white text-[12px] md:text-[16px]">
-                    Download App
-                  </p> */}
-                </div>
-
-                <div className="hidden">
-                  {currentUser ? (
-                    <UserMenu
-                      currentUser={currentUser}
-                      handleSignOut={handleSignOut}
-                    />
-                  ) : (
-                    <Link
-                      to="/user-register"
-                      className="bg-main-dark md:px-4 md:py-2 px-2 py-1 text-sm rounded md:text-[16px] text-white hover:bg-main-darker duration-200"
-                    >
-                      Sign In
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="h-[95x] bg-white z-50 shadow-lg ">
+        <div className="w-full flex justify-center items-center flex-col fixed z-40 bg-white  md:shadow-md border">
           <div className="flex justify-between items-center w-[90%] py-3">
             <Link to={"/"}>
               <div>
