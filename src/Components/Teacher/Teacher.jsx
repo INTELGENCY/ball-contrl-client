@@ -19,8 +19,16 @@ const Teacher = () => {
   }, []);
 
   return (
-    <SectionWrapper justifyContent={"center"} alignItems={"center"} margin={"mt-[4rem] lg:mt-[6rem]"} width={"85%"}>
-      <div className="w-full mb-[3rem] lg:h-[630px] bg-cover bg-center" style={{ backgroundImage: `url(${bgimg})`}}>
+    <SectionWrapper
+      justifyContent={"center"}
+      alignItems={"center"}
+      margin={"mt-[4rem] lg:mt-[6rem]"}
+      width={"85%"}
+    >
+      <div
+        className="w-full mb-[3rem] lg:h-[630px] bg-cover bg-center"
+        style={{ backgroundImage: `url(${bgimg})` }}
+      >
         <div className="    w-[60%]  lg:w-[50%] ml-6 lg:ml-[6rem] mt-[5rem] flex flex-col gap-16  h-[80%]">
           <div>
             <h1 className="lg:block font-semibold md:text-mianheading text-xl md:text-3xl text-white">
@@ -31,9 +39,12 @@ const Teacher = () => {
           </div>
           <div className=" md:flex  justify-start gap-2  md:ml-4">
             <img src={icon} alt="" className="w-[20px] h-[20px] " />
-            <p className=" text-white hidden lg:block ">Pass on your knowledge and help grow women's and girl's football.</p>
+            <p className=" text-white hidden lg:block ">
+              Pass on your knowledge and help grow women's and girl's football.
+            </p>
             <p className="text-white block lg:hidden">
-              Pass on your knowledge and  help grow women's  and girl's football.
+              Pass on your knowledge and help to grow women's and girl's
+              football.
             </p>
           </div>
         </div>

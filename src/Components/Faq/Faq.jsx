@@ -2,8 +2,7 @@ import React, { useState } from "react";
 
 const faqData = [
   {
-    question:
-      "Do I need a coaching qualification to coach with Ballcontrl; FA or UEFA?",
+    question: "What DBS level do I need to coach with Ball Contrl?",
     answer: (
       <>
         Yes you need to be qualified to Join Ballcontrl. If you do not please
@@ -29,9 +28,9 @@ const faqData = [
     question: "Commission",
     answer: (
       <>
-        We take a nominal fee of 18%, this is a commission used to help promote
-        the platform to new users via various online channels and keeps the
-        platform and staff working hard to push womens' and girl's football.
+        We take a fee of 12%. This is used to help promote the platform to new
+        users via various online channels and keeps the platform and staff
+        working hard to push women's and girls' football.
       </>
     ),
   },
@@ -40,9 +39,8 @@ const faqData = [
     answer: (
       <>
         We have no other hidden costs for you to worry about. In order to keep
-        the platform alive and provide players for you to coach. We take a
-        nominal commission fee on each booking received. Please see commission
-        structure on
+        the platform alive and provide players for you to coach, we take a
+        commission fee on each booking received.
         <a href="/" className="text-main-darker underline">
           commission page
         </a>
@@ -66,7 +64,7 @@ const faqData = [
   },
   {
     question: "How do I sign up?",
-    answer: "It is completely free to sign and list your services.",
+    answer: "It is completely free to sign up and list your services.",
   },
   {
     question: "How do I get paid?",
@@ -88,11 +86,11 @@ const FAQ = () => {
   };
 
   return (
-    <div className="p-0 bg-light-blue md:max-w-6xl m-auto">
-      <div className="flex justify-center items-start my-2 mx-8 2xl:mx-0">
-        <div className="w-full my-1">
+    <div className="p-0 bg-light-blue md:max-w-6xl m-auto ">
+      <div className="flex justify-center items-start my-2 mx-8 2xl:mx-0 ">
+        <div className="w-full my-1 mt-20">
           <h2 className="text-3xl font-semibold my-5 text-center text-gray-900">
-            Frequently <span className="text-main-dark">Asked</span> questions
+            FAQs
           </h2>
           <ul className="flex flex-col">
             {faqData.map((faq, index) => (

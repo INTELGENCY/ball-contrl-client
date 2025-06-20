@@ -60,8 +60,8 @@ export default function Checkout() {
 
   if (loading) return <div>Loading...</div>;
   return (
-    <div className="flex justify-center items-center mt-12 mb-5">
-      <div className="w-11/12 p-3 bg-gray-50 rounded-lg">
+    <div className="flex justify-center items-center">
+      <div className="w-11/12 p-3 bg-gray-50 rounded-lg mt-32">
         {/* Stepper component */}
         <div className="mb-4 flex justify-between items-center">
           {steps.map((step, index) => (

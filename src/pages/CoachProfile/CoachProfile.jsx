@@ -73,7 +73,7 @@ const CoachProfile = () => {
   return (
     <>
       {/* coach cover-profile image */}
-      <div>
+      <div className="">
         <div className="w-full" style={{ height: "348px" }}>
           <div className="flex flex-col">
             <div
