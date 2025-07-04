@@ -54,6 +54,15 @@ const UserMenu = ({ currentUser, handleSignOut }) => {
             </MenuItem>
           </Link>
         )}
+        {currentUser && currentUser.role === "admin" && (
+          <Link to="/admin">
+            <MenuItem className="flex items-center gap-2">
+              <Typography variant="small" className="font-medium">
+                Dashboard
+              </Typography>
+            </MenuItem>
+          </Link>
+        )}
         {currentUser && currentUser.userType === "Player" && (
           <Link to="/coaches">
             <MenuItem>

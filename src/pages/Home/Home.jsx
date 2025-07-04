@@ -1,6 +1,9 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
 import ChatBotAgent from "./ChatBotAgent";
+import { useSelect } from "@material-tailwind/react";
+import { useSelector } from "react-redux";
+import { checkAlreadySubscribeApi } from "../../services/AuthApis";
 
 // Lazy load components
 const Banner = lazy(() => import("../../Components/Banner/Banner"));
@@ -19,6 +22,26 @@ const EmailPopup = lazy(() => import("../../Components/EmailPopUp/EmailPopup"));
 // const FAQ = lazy(() => import("../../Components/Faq/Faq"));
 
 const Home = () => {
+  const [checkState, setCheckState] = useState(true);
+  const { currentUser } = useSelector((state) => state.user);
+  console.log(currentUser);
+
+  useEffect(() => {
+    try {
+      setCheckState(true);
+      const checkAlreadySubscribe = async () => {
+        const data = await checkAlreadySubscribeApi(currentUser?.email);
+        setCheckState(false);
+      };
+      if (currentUser) {
+        checkAlreadySubscribe();
+      }
+    } catch (error) {
+      setCheckState(true);
+      console.log("Error while getting data", error);
+    }
+  }, [currentUser]);
+
   return (
     <Suspense
       fallback={
@@ -36,7 +59,8 @@ const Home = () => {
         <Promo />
         <BecomeCoach />
         <Teacher />
-        <EmailPopup />
+        {!checkState && currentUser.role !== "admin" && <EmailPopup />}
+
         <ChatBotAgent />
       </div>
     </Suspense>

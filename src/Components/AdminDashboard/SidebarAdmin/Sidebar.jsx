@@ -11,7 +11,7 @@ import {
 import { MdMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { SiWebauthn } from "react-icons/si";
-import { ShieldQuestion } from "lucide-react";
+import { GroupIcon, ShieldQuestion, Users } from "lucide-react";
 
 const SideBarAdmin = ({ activeTab, setActiveTab }) => {
   // receive props
@@ -26,6 +26,7 @@ const SideBarAdmin = ({ activeTab, setActiveTab }) => {
     { tab: "home", icon: FaTachometerAlt, label: "Dashboard" },
     { tab: "active-booking", icon: FaClipboardList, label: "Active Booking" },
     { tab: "past-booking", icon: FaHistory, label: "Past Booking" },
+    { tab: "users", icon: Users, label: "Users" },
     // { tab: "sessions", icon: FaCalendarAlt, label: "Sessions" },
     {
       tab: "newsletter-subscribers",

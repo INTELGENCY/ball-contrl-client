@@ -74,3 +74,22 @@ export const updatePassword = async (
     console.log("This is the error:", error);
   }
 };
+
+export const checkAlreadySubscribeApi = async (email) => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/newsletter/checkAlready?email=${email}`,
+      {},
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error?.response?.data?.message || "Error while sending otp";
+    console.log("This is the error:", error);
+    throw error;
+  }
+};

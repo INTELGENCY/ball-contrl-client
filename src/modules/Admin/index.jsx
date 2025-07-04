@@ -12,6 +12,7 @@ import NewLetterSubscribers from "./Dashboard/NewLetterSubscribers";
 import Blogs from "./Dashboard/Blogs";
 import { ToastContainer } from "react-toastify";
 import ChatbotFaqs from "./Dashboard/ChatbotFaqs";
+import UsersManagement from "./Dashboard/Users";
 const AdminDashboard = () => {
   return (
     <>
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
           <Route path="active-booking" element={<AllBookings />} />
           <Route path="past-booking" element={<PastBookings />} />
           <Route path="sessions" element={<Sessions />} />
+          <Route path="users" element={<UsersManagement />} />
           <Route
             path="newsletter-subscribers"
             element={<NewLetterSubscribers />}
